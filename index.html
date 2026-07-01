@@ -90,6 +90,9 @@
     box-shadow:0 8px 30px rgba(0,0,0,.35);background:var(--panel-2)}
   .flag-img.contour-img{aspect-ratio:1/1;object-fit:contain;padding:14px;filter:invert(1) drop-shadow(0 8px 20px rgba(0,0,0,.45))}
 
+  /* ★ CAPITALES : nom du pays affiché sous le drapeau */
+  .pays-nom{font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;margin-top:16px;display:none}
+
   /* réponses QCM */
   .answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
   .ans{font-family:'Inter';font-size:16px;font-weight:500;text-align:left;cursor:pointer;background:var(--panel);
@@ -142,7 +145,7 @@
   <!-- ============ ÉCRAN 1 : ACCUEIL ============ -->
   <section class="screen active" id="screen-home">
     <h1 class="hero-h1">Reconnais-tu<br>le monde&nbsp;? <em>▸</em></h1>
-    <p class="hero-p">Trois façons de tester ta géographie. Drapeaux et contours sont jouables, les hymnes arrivent bientôt.</p>
+    <p class="hero-p">Quatre façons de tester ta géographie. Drapeaux, contours et capitales sont jouables, les hymnes arrivent bientôt.</p>
 
     <div class="format">
       <span class="lbl">Réponses</span>
@@ -163,6 +166,12 @@
         <span class="m-txt"><b>Contours</b><small>Devine le pays d'après sa forme</small></span>
         <span class="badge on">Jouable</span>
       </button>
+      <!-- ★ CAPITALES : nouvelle carte de mode -->
+      <button class="mode" onclick="startQuiz('capitales')">
+        <span class="emoji">🏛️</span>
+        <span class="m-txt"><b>Capitales</b><small>Trouve la capitale du pays affiché</small></span>
+        <span class="badge on">Jouable</span>
+      </button>
       <button class="mode soon" disabled>
         <span class="emoji">🎵</span>
         <span class="m-txt"><b>Hymnes</b><small>Devine le pays d'après son hymne</small></span>
@@ -179,8 +188,11 @@
     </div>
 
     <div class="flag-card">
-      <div class="q-label">Quel est ce pays&nbsp;?</div>
+      <!-- ★ CAPITALES : le libellé de question a maintenant un id pour pouvoir changer son texte -->
+      <div class="q-label" id="qLabel">Quel est ce pays&nbsp;?</div>
       <img class="flag-img" id="flagImg" alt="Drapeau à identifier">
+      <!-- ★ CAPITALES : nom du pays affiché sous le drapeau (masqué dans les autres modes) -->
+      <div class="pays-nom" id="paysNom"></div>
     </div>
 
     <!-- mode QCM -->
@@ -219,210 +231,213 @@
 /* =====================================================================
    1) LES DONNÉES  —  une ligne = un pays. Ajouter un pays = ajouter
    une ligne. "code" = code ISO à 2 lettres, en minuscules.
+   ★ CAPITALES : chaque pays a maintenant un champ "cap" (sa capitale)
+   et parfois "capAlt" : une liste d'autres réponses acceptées en mode
+   Saisie (ex. "La Haye" pour les Pays-Bas, "Beijing" pour Pékin).
    ===================================================================== */
 const PAYS = [
-  {code:"fr", nom:"France",          continent:"Europe"},
-  {code:"de", nom:"Allemagne",       continent:"Europe"},
-  {code:"it", nom:"Italie",          continent:"Europe"},
-  {code:"es", nom:"Espagne",         continent:"Europe"},
-  {code:"pt", nom:"Portugal",        continent:"Europe"},
-  {code:"gb", nom:"Royaume-Uni",     continent:"Europe"},
-  {code:"ie", nom:"Irlande",         continent:"Europe"},
-  {code:"nl", nom:"Pays-Bas",        continent:"Europe"},
-  {code:"be", nom:"Belgique",        continent:"Europe"},
-  {code:"ch", nom:"Suisse",          continent:"Europe"},
-  {code:"se", nom:"Suède",           continent:"Europe"},
-  {code:"no", nom:"Norvège",         continent:"Europe"},
-  {code:"pl", nom:"Pologne",         continent:"Europe"},
-  {code:"gr", nom:"Grèce",           continent:"Europe"},
-  {code:"at", nom:"Autriche",        continent:"Europe"},
-  {code:"al", nom:"Albanie", continent:"Europe"},
-  {code:"ad", nom:"Andorre", continent:"Europe"},
-  {code:"by", nom:"Biélorussie", continent:"Europe"},
-  {code:"ba", nom:"Bosnie-Herzégovine", continent:"Europe"},
-  {code:"bg", nom:"Bulgarie", continent:"Europe"},
-  {code:"cy", nom:"Chypre", continent:"Europe"},
-  {code:"hr", nom:"Croatie", continent:"Europe"},
-  {code:"dk", nom:"Danemark", continent:"Europe"},
-  {code:"ee", nom:"Estonie", continent:"Europe"},
-  {code:"fi", nom:"Finlande", continent:"Europe"},
-  {code:"hu", nom:"Hongrie", continent:"Europe"},
-  {code:"is", nom:"Islande", continent:"Europe"},
-  {code:"xk", nom:"Kosovo", continent:"Europe"},
-  {code:"lv", nom:"Lettonie", continent:"Europe"},
-  {code:"li", nom:"Liechtenstein", continent:"Europe"},
-  {code:"lt", nom:"Lituanie", continent:"Europe"},
-  {code:"lu", nom:"Luxembourg", continent:"Europe"},
-  {code:"mk", nom:"Macédoine du Nord", continent:"Europe"},
-  {code:"mt", nom:"Malte", continent:"Europe"},
-  {code:"md", nom:"Moldavie", continent:"Europe"},
-  {code:"mc", nom:"Monaco", continent:"Europe"},
-  {code:"me", nom:"Monténégro", continent:"Europe"},
-  {code:"ro", nom:"Roumanie", continent:"Europe"},
-  {code:"ru", nom:"Russie", continent:"Europe"},
-  {code:"sm", nom:"Saint-Marin", continent:"Europe"},
-  {code:"rs", nom:"Serbie", continent:"Europe"},
-  {code:"sk", nom:"Slovaquie", continent:"Europe"},
-  {code:"si", nom:"Slovénie", continent:"Europe"},
-  {code:"cz", nom:"Tchéquie", continent:"Europe"},
-  {code:"ua", nom:"Ukraine", continent:"Europe"},
-  {code:"va", nom:"Vatican", continent:"Europe"},
+  {code:"fr", nom:"France",          continent:"Europe", cap:"Paris"},
+  {code:"de", nom:"Allemagne",       continent:"Europe", cap:"Berlin"},
+  {code:"it", nom:"Italie",          continent:"Europe", cap:"Rome"},
+  {code:"es", nom:"Espagne",         continent:"Europe", cap:"Madrid"},
+  {code:"pt", nom:"Portugal",        continent:"Europe", cap:"Lisbonne"},
+  {code:"gb", nom:"Royaume-Uni",     continent:"Europe", cap:"Londres"},
+  {code:"ie", nom:"Irlande",         continent:"Europe", cap:"Dublin"},
+  {code:"nl", nom:"Pays-Bas",        continent:"Europe", cap:"Amsterdam", capAlt:["La Haye"]},
+  {code:"be", nom:"Belgique",        continent:"Europe", cap:"Bruxelles"},
+  {code:"ch", nom:"Suisse",          continent:"Europe", cap:"Berne"},
+  {code:"se", nom:"Suède",           continent:"Europe", cap:"Stockholm"},
+  {code:"no", nom:"Norvège",         continent:"Europe", cap:"Oslo"},
+  {code:"pl", nom:"Pologne",         continent:"Europe", cap:"Varsovie"},
+  {code:"gr", nom:"Grèce",           continent:"Europe", cap:"Athènes"},
+  {code:"at", nom:"Autriche",        continent:"Europe", cap:"Vienne"},
+  {code:"al", nom:"Albanie", continent:"Europe", cap:"Tirana"},
+  {code:"ad", nom:"Andorre", continent:"Europe", cap:"Andorre-la-Vieille"},
+  {code:"by", nom:"Biélorussie", continent:"Europe", cap:"Minsk"},
+  {code:"ba", nom:"Bosnie-Herzégovine", continent:"Europe", cap:"Sarajevo"},
+  {code:"bg", nom:"Bulgarie", continent:"Europe", cap:"Sofia"},
+  {code:"cy", nom:"Chypre", continent:"Europe", cap:"Nicosie"},
+  {code:"hr", nom:"Croatie", continent:"Europe", cap:"Zagreb"},
+  {code:"dk", nom:"Danemark", continent:"Europe", cap:"Copenhague"},
+  {code:"ee", nom:"Estonie", continent:"Europe", cap:"Tallinn"},
+  {code:"fi", nom:"Finlande", continent:"Europe", cap:"Helsinki"},
+  {code:"hu", nom:"Hongrie", continent:"Europe", cap:"Budapest"},
+  {code:"is", nom:"Islande", continent:"Europe", cap:"Reykjavik"},
+  {code:"xk", nom:"Kosovo", continent:"Europe", cap:"Pristina"},
+  {code:"lv", nom:"Lettonie", continent:"Europe", cap:"Riga"},
+  {code:"li", nom:"Liechtenstein", continent:"Europe", cap:"Vaduz"},
+  {code:"lt", nom:"Lituanie", continent:"Europe", cap:"Vilnius"},
+  {code:"lu", nom:"Luxembourg", continent:"Europe", cap:"Luxembourg"},
+  {code:"mk", nom:"Macédoine du Nord", continent:"Europe", cap:"Skopje"},
+  {code:"mt", nom:"Malte", continent:"Europe", cap:"La Valette"},
+  {code:"md", nom:"Moldavie", continent:"Europe", cap:"Chisinau"},
+  {code:"mc", nom:"Monaco", continent:"Europe", cap:"Monaco"},
+  {code:"me", nom:"Monténégro", continent:"Europe", cap:"Podgorica"},
+  {code:"ro", nom:"Roumanie", continent:"Europe", cap:"Bucarest"},
+  {code:"ru", nom:"Russie", continent:"Europe", cap:"Moscou"},
+  {code:"sm", nom:"Saint-Marin", continent:"Europe", cap:"Saint-Marin"},
+  {code:"rs", nom:"Serbie", continent:"Europe", cap:"Belgrade"},
+  {code:"sk", nom:"Slovaquie", continent:"Europe", cap:"Bratislava"},
+  {code:"si", nom:"Slovénie", continent:"Europe", cap:"Ljubljana"},
+  {code:"cz", nom:"Tchéquie", continent:"Europe", cap:"Prague"},
+  {code:"ua", nom:"Ukraine", continent:"Europe", cap:"Kiev", capAlt:["Kyiv"]},
+  {code:"va", nom:"Vatican", continent:"Europe", cap:"Cité du Vatican", capAlt:["Vatican"]},
 
-  {code:"us", nom:"États-Unis",      continent:"Amériques"},
-  {code:"ca", nom:"Canada",          continent:"Amériques"},
-  {code:"mx", nom:"Mexique",         continent:"Amériques"},
-  {code:"br", nom:"Brésil",          continent:"Amériques"},
-  {code:"ar", nom:"Argentine",       continent:"Amériques"},
-  {code:"cl", nom:"Chili",           continent:"Amériques"},
-  {code:"co", nom:"Colombie",        continent:"Amériques"},
-  {code:"pe", nom:"Pérou",           continent:"Amériques"},
-  {code:"ag", nom:"Antigua-et-Barbuda", continent:"Amériques"},
-  {code:"bs", nom:"Bahamas", continent:"Amériques"},
-  {code:"bb", nom:"Barbade", continent:"Amériques"},
-  {code:"bz", nom:"Belize", continent:"Amériques"},
-  {code:"bo", nom:"Bolivie", continent:"Amériques"},
-  {code:"cr", nom:"Costa Rica", continent:"Amériques"},
-  {code:"cu", nom:"Cuba", continent:"Amériques"},
-  {code:"dm", nom:"Dominique", continent:"Amériques"},
-  {code:"gd", nom:"Grenade", continent:"Amériques"},
-  {code:"gt", nom:"Guatemala", continent:"Amériques"},
-  {code:"gy", nom:"Guyana", continent:"Amériques"},
-  {code:"ht", nom:"Haïti", continent:"Amériques"},
-  {code:"hn", nom:"Honduras", continent:"Amériques"},
-  {code:"jm", nom:"Jamaïque", continent:"Amériques"},
-  {code:"ni", nom:"Nicaragua", continent:"Amériques"},
-  {code:"pa", nom:"Panama", continent:"Amériques"},
-  {code:"py", nom:"Paraguay", continent:"Amériques"},
-  {code:"do", nom:"République dominicaine", continent:"Amériques"},
-  {code:"kn", nom:"Saint-Christophe-et-Niévès", continent:"Amériques"},
-  {code:"vc", nom:"Saint-Vincent-et-les-Grenadines", continent:"Amériques"},
-  {code:"lc", nom:"Sainte-Lucie", continent:"Amériques"},
-  {code:"sv", nom:"Salvador", continent:"Amériques"},
-  {code:"sr", nom:"Suriname", continent:"Amériques"},
-  {code:"tt", nom:"Trinité-et-Tobago", continent:"Amériques"},
-  {code:"uy", nom:"Uruguay", continent:"Amériques"},
-  {code:"ve", nom:"Venezuela", continent:"Amériques"},
-  {code:"ec", nom:"Équateur", continent:"Amériques"},
+  {code:"us", nom:"États-Unis",      continent:"Amériques", cap:"Washington", capAlt:["Washington D.C."]},
+  {code:"ca", nom:"Canada",          continent:"Amériques", cap:"Ottawa"},
+  {code:"mx", nom:"Mexique",         continent:"Amériques", cap:"Mexico"},
+  {code:"br", nom:"Brésil",          continent:"Amériques", cap:"Brasilia"},
+  {code:"ar", nom:"Argentine",       continent:"Amériques", cap:"Buenos Aires"},
+  {code:"cl", nom:"Chili",           continent:"Amériques", cap:"Santiago"},
+  {code:"co", nom:"Colombie",        continent:"Amériques", cap:"Bogota"},
+  {code:"pe", nom:"Pérou",           continent:"Amériques", cap:"Lima"},
+  {code:"ag", nom:"Antigua-et-Barbuda", continent:"Amériques", cap:"Saint John's"},
+  {code:"bs", nom:"Bahamas", continent:"Amériques", cap:"Nassau"},
+  {code:"bb", nom:"Barbade", continent:"Amériques", cap:"Bridgetown"},
+  {code:"bz", nom:"Belize", continent:"Amériques", cap:"Belmopan"},
+  {code:"bo", nom:"Bolivie", continent:"Amériques", cap:"Sucre", capAlt:["La Paz"]},
+  {code:"cr", nom:"Costa Rica", continent:"Amériques", cap:"San José"},
+  {code:"cu", nom:"Cuba", continent:"Amériques", cap:"La Havane"},
+  {code:"dm", nom:"Dominique", continent:"Amériques", cap:"Roseau"},
+  {code:"gd", nom:"Grenade", continent:"Amériques", cap:"Saint-Georges"},
+  {code:"gt", nom:"Guatemala", continent:"Amériques", cap:"Guatemala", capAlt:["Guatemala City","Ciudad de Guatemala"]},
+  {code:"gy", nom:"Guyana", continent:"Amériques", cap:"Georgetown"},
+  {code:"ht", nom:"Haïti", continent:"Amériques", cap:"Port-au-Prince"},
+  {code:"hn", nom:"Honduras", continent:"Amériques", cap:"Tegucigalpa"},
+  {code:"jm", nom:"Jamaïque", continent:"Amériques", cap:"Kingston"},
+  {code:"ni", nom:"Nicaragua", continent:"Amériques", cap:"Managua"},
+  {code:"pa", nom:"Panama", continent:"Amériques", cap:"Panama", capAlt:["Panama City"]},
+  {code:"py", nom:"Paraguay", continent:"Amériques", cap:"Asuncion"},
+  {code:"do", nom:"République dominicaine", continent:"Amériques", cap:"Saint-Domingue", capAlt:["Santo Domingo"]},
+  {code:"kn", nom:"Saint-Christophe-et-Niévès", continent:"Amériques", cap:"Basseterre"},
+  {code:"vc", nom:"Saint-Vincent-et-les-Grenadines", continent:"Amériques", cap:"Kingstown"},
+  {code:"lc", nom:"Sainte-Lucie", continent:"Amériques", cap:"Castries"},
+  {code:"sv", nom:"Salvador", continent:"Amériques", cap:"San Salvador"},
+  {code:"sr", nom:"Suriname", continent:"Amériques", cap:"Paramaribo"},
+  {code:"tt", nom:"Trinité-et-Tobago", continent:"Amériques", cap:"Port-d'Espagne", capAlt:["Port of Spain"]},
+  {code:"uy", nom:"Uruguay", continent:"Amériques", cap:"Montevideo"},
+  {code:"ve", nom:"Venezuela", continent:"Amériques", cap:"Caracas"},
+  {code:"ec", nom:"Équateur", continent:"Amériques", cap:"Quito"},
 
-  {code:"jp", nom:"Japon",           continent:"Asie"},
-  {code:"cn", nom:"Chine",           continent:"Asie"},
-  {code:"kr", nom:"Corée du Sud",    continent:"Asie"},
-  {code:"in", nom:"Inde",            continent:"Asie"},
-  {code:"th", nom:"Thaïlande",       continent:"Asie"},
-  {code:"vn", nom:"Viêt Nam",        continent:"Asie"},
-  {code:"id", nom:"Indonésie",       continent:"Asie"},
-  {code:"tr", nom:"Turquie",         continent:"Asie"},
-  {code:"af", nom:"Afghanistan", continent:"Asie"},
-  {code:"sa", nom:"Arabie saoudite", continent:"Asie"},
-  {code:"am", nom:"Arménie", continent:"Asie"},
-  {code:"az", nom:"Azerbaïdjan", continent:"Asie"},
-  {code:"bh", nom:"Bahreïn", continent:"Asie"},
-  {code:"bd", nom:"Bangladesh", continent:"Asie"},
-  {code:"bt", nom:"Bhoutan", continent:"Asie"},
-  {code:"bn", nom:"Brunei", continent:"Asie"},
-  {code:"kh", nom:"Cambodge", continent:"Asie"},
-  {code:"kp", nom:"Corée du Nord", continent:"Asie"},
-  {code:"ge", nom:"Géorgie", continent:"Asie"},
-  {code:"iq", nom:"Irak", continent:"Asie"},
-  {code:"ir", nom:"Iran", continent:"Asie"},
-  {code:"il", nom:"Israël", continent:"Asie"},
-  {code:"jo", nom:"Jordanie", continent:"Asie"},
-  {code:"kz", nom:"Kazakhstan", continent:"Asie"},
-  {code:"kg", nom:"Kirghizistan", continent:"Asie"},
-  {code:"kw", nom:"Koweït", continent:"Asie"},
-  {code:"la", nom:"Laos", continent:"Asie"},
-  {code:"lb", nom:"Liban", continent:"Asie"},
-  {code:"my", nom:"Malaisie", continent:"Asie"},
-  {code:"mv", nom:"Maldives", continent:"Asie"},
-  {code:"mn", nom:"Mongolie", continent:"Asie"},
-  {code:"mm", nom:"Myanmar", continent:"Asie"},
-  {code:"np", nom:"Népal", continent:"Asie"},
-  {code:"om", nom:"Oman", continent:"Asie"},
-  {code:"pk", nom:"Pakistan", continent:"Asie"},
-  {code:"ps", nom:"Palestine", continent:"Asie"},
-  {code:"ph", nom:"Philippines", continent:"Asie"},
-  {code:"qa", nom:"Qatar", continent:"Asie"},
-  {code:"sg", nom:"Singapour", continent:"Asie"},
-  {code:"lk", nom:"Sri Lanka", continent:"Asie"},
-  {code:"sy", nom:"Syrie", continent:"Asie"},
-  {code:"tj", nom:"Tadjikistan", continent:"Asie"},
-  {code:"tl", nom:"Timor oriental", continent:"Asie"},
-  {code:"tm", nom:"Turkménistan", continent:"Asie"},
-  {code:"uz", nom:"Ouzbékistan", continent:"Asie"},
-  {code:"ae", nom:"Émirats arabes unis", continent:"Asie"},
-  {code:"ye", nom:"Yémen", continent:"Asie"},
+  {code:"jp", nom:"Japon",           continent:"Asie", cap:"Tokyo"},
+  {code:"cn", nom:"Chine",           continent:"Asie", cap:"Pékin", capAlt:["Beijing"]},
+  {code:"kr", nom:"Corée du Sud",    continent:"Asie", cap:"Séoul"},
+  {code:"in", nom:"Inde",            continent:"Asie", cap:"New Delhi", capAlt:["Delhi"]},
+  {code:"th", nom:"Thaïlande",       continent:"Asie", cap:"Bangkok"},
+  {code:"vn", nom:"Viêt Nam",        continent:"Asie", cap:"Hanoï"},
+  {code:"id", nom:"Indonésie",       continent:"Asie", cap:"Jakarta"},
+  {code:"tr", nom:"Turquie",         continent:"Asie", cap:"Ankara"},
+  {code:"af", nom:"Afghanistan", continent:"Asie", cap:"Kaboul"},
+  {code:"sa", nom:"Arabie saoudite", continent:"Asie", cap:"Riyad"},
+  {code:"am", nom:"Arménie", continent:"Asie", cap:"Erevan"},
+  {code:"az", nom:"Azerbaïdjan", continent:"Asie", cap:"Bakou"},
+  {code:"bh", nom:"Bahreïn", continent:"Asie", cap:"Manama"},
+  {code:"bd", nom:"Bangladesh", continent:"Asie", cap:"Dacca", capAlt:["Dhaka"]},
+  {code:"bt", nom:"Bhoutan", continent:"Asie", cap:"Thimphou"},
+  {code:"bn", nom:"Brunei", continent:"Asie", cap:"Bandar Seri Begawan"},
+  {code:"kh", nom:"Cambodge", continent:"Asie", cap:"Phnom Penh"},
+  {code:"kp", nom:"Corée du Nord", continent:"Asie", cap:"Pyongyang"},
+  {code:"ge", nom:"Géorgie", continent:"Asie", cap:"Tbilissi"},
+  {code:"iq", nom:"Irak", continent:"Asie", cap:"Bagdad"},
+  {code:"ir", nom:"Iran", continent:"Asie", cap:"Téhéran"},
+  {code:"il", nom:"Israël", continent:"Asie", cap:"Jérusalem"},
+  {code:"jo", nom:"Jordanie", continent:"Asie", cap:"Amman"},
+  {code:"kz", nom:"Kazakhstan", continent:"Asie", cap:"Astana", capAlt:["Noursoultan","Nur-Sultan"]},
+  {code:"kg", nom:"Kirghizistan", continent:"Asie", cap:"Bichkek"},
+  {code:"kw", nom:"Koweït", continent:"Asie", cap:"Koweït", capAlt:["Koweït City","Kuwait City"]},
+  {code:"la", nom:"Laos", continent:"Asie", cap:"Vientiane"},
+  {code:"lb", nom:"Liban", continent:"Asie", cap:"Beyrouth"},
+  {code:"my", nom:"Malaisie", continent:"Asie", cap:"Kuala Lumpur", capAlt:["Putrajaya"]},
+  {code:"mv", nom:"Maldives", continent:"Asie", cap:"Malé"},
+  {code:"mn", nom:"Mongolie", continent:"Asie", cap:"Oulan-Bator"},
+  {code:"mm", nom:"Myanmar", continent:"Asie", cap:"Naypyidaw"},
+  {code:"np", nom:"Népal", continent:"Asie", cap:"Katmandou"},
+  {code:"om", nom:"Oman", continent:"Asie", cap:"Mascate"},
+  {code:"pk", nom:"Pakistan", continent:"Asie", cap:"Islamabad"},
+  {code:"ps", nom:"Palestine", continent:"Asie", cap:"Ramallah", capAlt:["Jérusalem-Est"]},
+  {code:"ph", nom:"Philippines", continent:"Asie", cap:"Manille"},
+  {code:"qa", nom:"Qatar", continent:"Asie", cap:"Doha"},
+  {code:"sg", nom:"Singapour", continent:"Asie", cap:"Singapour"},
+  {code:"lk", nom:"Sri Lanka", continent:"Asie", cap:"Sri Jayawardenapura Kotte", capAlt:["Colombo","Kotte"]},
+  {code:"sy", nom:"Syrie", continent:"Asie", cap:"Damas"},
+  {code:"tj", nom:"Tadjikistan", continent:"Asie", cap:"Douchanbé"},
+  {code:"tl", nom:"Timor oriental", continent:"Asie", cap:"Dili"},
+  {code:"tm", nom:"Turkménistan", continent:"Asie", cap:"Achgabat"},
+  {code:"uz", nom:"Ouzbékistan", continent:"Asie", cap:"Tachkent"},
+  {code:"ae", nom:"Émirats arabes unis", continent:"Asie", cap:"Abou Dabi", capAlt:["Abu Dhabi"]},
+  {code:"ye", nom:"Yémen", continent:"Asie", cap:"Sanaa"},
 
-  {code:"ma", nom:"Maroc",           continent:"Afrique"},
-  {code:"dz", nom:"Algérie",         continent:"Afrique"},
-  {code:"tn", nom:"Tunisie",         continent:"Afrique"},
-  {code:"eg", nom:"Égypte",          continent:"Afrique"},
-  {code:"za", nom:"Afrique du Sud",  continent:"Afrique"},
-  {code:"sn", nom:"Sénégal",         continent:"Afrique"},
-  {code:"ng", nom:"Nigéria",         continent:"Afrique"},
-  {code:"ke", nom:"Kenya",           continent:"Afrique"},
-  {code:"ao", nom:"Angola", continent:"Afrique"},
-  {code:"bw", nom:"Botswana", continent:"Afrique"},
-  {code:"bf", nom:"Burkina Faso", continent:"Afrique"},
-  {code:"bi", nom:"Burundi", continent:"Afrique"},
-  {code:"bj", nom:"Bénin", continent:"Afrique"},
-  {code:"cm", nom:"Cameroun", continent:"Afrique"},
-  {code:"cv", nom:"Cap-Vert", continent:"Afrique"},
-  {code:"km", nom:"Comores", continent:"Afrique"},
-  {code:"cg", nom:"Congo", continent:"Afrique"},
-  {code:"ci", nom:"Côte d'Ivoire", continent:"Afrique"},
-  {code:"dj", nom:"Djibouti", continent:"Afrique"},
-  {code:"sz", nom:"Eswatini", continent:"Afrique"},
-  {code:"ga", nom:"Gabon", continent:"Afrique"},
-  {code:"gm", nom:"Gambie", continent:"Afrique"},
-  {code:"gh", nom:"Ghana", continent:"Afrique"},
-  {code:"gn", nom:"Guinée", continent:"Afrique"},
-  {code:"gq", nom:"Guinée équatoriale", continent:"Afrique"},
-  {code:"gw", nom:"Guinée-Bissau", continent:"Afrique"},
-  {code:"ls", nom:"Lesotho", continent:"Afrique"},
-  {code:"lr", nom:"Liberia", continent:"Afrique"},
-  {code:"ly", nom:"Libye", continent:"Afrique"},
-  {code:"mg", nom:"Madagascar", continent:"Afrique"},
-  {code:"mw", nom:"Malawi", continent:"Afrique"},
-  {code:"ml", nom:"Mali", continent:"Afrique"},
-  {code:"mu", nom:"Maurice", continent:"Afrique"},
-  {code:"mr", nom:"Mauritanie", continent:"Afrique"},
-  {code:"mz", nom:"Mozambique", continent:"Afrique"},
-  {code:"na", nom:"Namibie", continent:"Afrique"},
-  {code:"ne", nom:"Niger", continent:"Afrique"},
-  {code:"ug", nom:"Ouganda", continent:"Afrique"},
-  {code:"rw", nom:"Rwanda", continent:"Afrique"},
-  {code:"cf", nom:"République centrafricaine", continent:"Afrique"},
-  {code:"cd", nom:"République démocratique du Congo", continent:"Afrique"},
-  {code:"st", nom:"Sao Tomé-et-Principe", continent:"Afrique"},
-  {code:"sc", nom:"Seychelles", continent:"Afrique"},
-  {code:"sl", nom:"Sierra Leone", continent:"Afrique"},
-  {code:"so", nom:"Somalie", continent:"Afrique"},
-  {code:"sd", nom:"Soudan", continent:"Afrique"},
-  {code:"ss", nom:"Soudan du Sud", continent:"Afrique"},
-  {code:"tz", nom:"Tanzanie", continent:"Afrique"},
-  {code:"td", nom:"Tchad", continent:"Afrique"},
-  {code:"tg", nom:"Togo", continent:"Afrique"},
-  {code:"er", nom:"Érythrée", continent:"Afrique"},
-  {code:"et", nom:"Éthiopie", continent:"Afrique"},
-  {code:"zm", nom:"Zambie", continent:"Afrique"},
-  {code:"zw", nom:"Zimbabwe", continent:"Afrique"},
+  {code:"ma", nom:"Maroc",           continent:"Afrique", cap:"Rabat"},
+  {code:"dz", nom:"Algérie",         continent:"Afrique", cap:"Alger"},
+  {code:"tn", nom:"Tunisie",         continent:"Afrique", cap:"Tunis"},
+  {code:"eg", nom:"Égypte",          continent:"Afrique", cap:"Le Caire"},
+  {code:"za", nom:"Afrique du Sud",  continent:"Afrique", cap:"Pretoria", capAlt:["Le Cap","Bloemfontein"]},
+  {code:"sn", nom:"Sénégal",         continent:"Afrique", cap:"Dakar"},
+  {code:"ng", nom:"Nigéria",         continent:"Afrique", cap:"Abuja"},
+  {code:"ke", nom:"Kenya",           continent:"Afrique", cap:"Nairobi"},
+  {code:"ao", nom:"Angola", continent:"Afrique", cap:"Luanda"},
+  {code:"bw", nom:"Botswana", continent:"Afrique", cap:"Gaborone"},
+  {code:"bf", nom:"Burkina Faso", continent:"Afrique", cap:"Ouagadougou"},
+  {code:"bi", nom:"Burundi", continent:"Afrique", cap:"Gitega", capAlt:["Bujumbura"]},
+  {code:"bj", nom:"Bénin", continent:"Afrique", cap:"Porto-Novo", capAlt:["Cotonou"]},
+  {code:"cm", nom:"Cameroun", continent:"Afrique", cap:"Yaoundé"},
+  {code:"cv", nom:"Cap-Vert", continent:"Afrique", cap:"Praia"},
+  {code:"km", nom:"Comores", continent:"Afrique", cap:"Moroni"},
+  {code:"cg", nom:"Congo", continent:"Afrique", cap:"Brazzaville"},
+  {code:"ci", nom:"Côte d'Ivoire", continent:"Afrique", cap:"Yamoussoukro", capAlt:["Abidjan"]},
+  {code:"dj", nom:"Djibouti", continent:"Afrique", cap:"Djibouti"},
+  {code:"sz", nom:"Eswatini", continent:"Afrique", cap:"Mbabane", capAlt:["Lobamba"]},
+  {code:"ga", nom:"Gabon", continent:"Afrique", cap:"Libreville"},
+  {code:"gm", nom:"Gambie", continent:"Afrique", cap:"Banjul"},
+  {code:"gh", nom:"Ghana", continent:"Afrique", cap:"Accra"},
+  {code:"gn", nom:"Guinée", continent:"Afrique", cap:"Conakry"},
+  {code:"gq", nom:"Guinée équatoriale", continent:"Afrique", cap:"Malabo"},
+  {code:"gw", nom:"Guinée-Bissau", continent:"Afrique", cap:"Bissau"},
+  {code:"ls", nom:"Lesotho", continent:"Afrique", cap:"Maseru"},
+  {code:"lr", nom:"Liberia", continent:"Afrique", cap:"Monrovia"},
+  {code:"ly", nom:"Libye", continent:"Afrique", cap:"Tripoli"},
+  {code:"mg", nom:"Madagascar", continent:"Afrique", cap:"Antananarivo", capAlt:["Tananarive"]},
+  {code:"mw", nom:"Malawi", continent:"Afrique", cap:"Lilongwe"},
+  {code:"ml", nom:"Mali", continent:"Afrique", cap:"Bamako"},
+  {code:"mu", nom:"Maurice", continent:"Afrique", cap:"Port-Louis"},
+  {code:"mr", nom:"Mauritanie", continent:"Afrique", cap:"Nouakchott"},
+  {code:"mz", nom:"Mozambique", continent:"Afrique", cap:"Maputo"},
+  {code:"na", nom:"Namibie", continent:"Afrique", cap:"Windhoek"},
+  {code:"ne", nom:"Niger", continent:"Afrique", cap:"Niamey"},
+  {code:"ug", nom:"Ouganda", continent:"Afrique", cap:"Kampala"},
+  {code:"rw", nom:"Rwanda", continent:"Afrique", cap:"Kigali"},
+  {code:"cf", nom:"République centrafricaine", continent:"Afrique", cap:"Bangui"},
+  {code:"cd", nom:"République démocratique du Congo", continent:"Afrique", cap:"Kinshasa"},
+  {code:"st", nom:"Sao Tomé-et-Principe", continent:"Afrique", cap:"Sao Tomé"},
+  {code:"sc", nom:"Seychelles", continent:"Afrique", cap:"Victoria"},
+  {code:"sl", nom:"Sierra Leone", continent:"Afrique", cap:"Freetown"},
+  {code:"so", nom:"Somalie", continent:"Afrique", cap:"Mogadiscio"},
+  {code:"sd", nom:"Soudan", continent:"Afrique", cap:"Khartoum"},
+  {code:"ss", nom:"Soudan du Sud", continent:"Afrique", cap:"Djouba", capAlt:["Juba"]},
+  {code:"tz", nom:"Tanzanie", continent:"Afrique", cap:"Dodoma", capAlt:["Dar es Salam","Dar es Salaam"]},
+  {code:"td", nom:"Tchad", continent:"Afrique", cap:"N'Djamena"},
+  {code:"tg", nom:"Togo", continent:"Afrique", cap:"Lomé"},
+  {code:"er", nom:"Érythrée", continent:"Afrique", cap:"Asmara"},
+  {code:"et", nom:"Éthiopie", continent:"Afrique", cap:"Addis-Abeba"},
+  {code:"zm", nom:"Zambie", continent:"Afrique", cap:"Lusaka"},
+  {code:"zw", nom:"Zimbabwe", continent:"Afrique", cap:"Harare"},
 
-  {code:"au", nom:"Australie",       continent:"Océanie"},
-  {code:"nz", nom:"Nouvelle-Zélande",continent:"Océanie"},
-  {code:"fj", nom:"Fidji", continent:"Océanie"},
-  {code:"ki", nom:"Kiribati", continent:"Océanie"},
-  {code:"fm", nom:"Micronésie", continent:"Océanie"},
-  {code:"nr", nom:"Nauru", continent:"Océanie"},
-  {code:"nu", nom:"Niue", continent:"Océanie"},
-  {code:"pw", nom:"Palaos", continent:"Océanie"},
-  {code:"pg", nom:"Papouasie-Nouvelle-Guinée", continent:"Océanie"},
-  {code:"ws", nom:"Samoa", continent:"Océanie"},
-  {code:"to", nom:"Tonga", continent:"Océanie"},
-  {code:"tv", nom:"Tuvalu", continent:"Océanie"},
-  {code:"vu", nom:"Vanuatu", continent:"Océanie"},
-  {code:"ck", nom:"Îles Cook", continent:"Océanie"},
-  {code:"mh", nom:"Îles Marshall", continent:"Océanie"},
-  {code:"sb", nom:"Îles Salomon", continent:"Océanie"},
+  {code:"au", nom:"Australie",       continent:"Océanie", cap:"Canberra"},
+  {code:"nz", nom:"Nouvelle-Zélande",continent:"Océanie", cap:"Wellington"},
+  {code:"fj", nom:"Fidji", continent:"Océanie", cap:"Suva"},
+  {code:"ki", nom:"Kiribati", continent:"Océanie", cap:"Tarawa", capAlt:["Tarawa-Sud","South Tarawa"]},
+  {code:"fm", nom:"Micronésie", continent:"Océanie", cap:"Palikir"},
+  {code:"nr", nom:"Nauru", continent:"Océanie", cap:"Yaren"},
+  {code:"nu", nom:"Niue", continent:"Océanie", cap:"Alofi"},
+  {code:"pw", nom:"Palaos", continent:"Océanie", cap:"Ngerulmud"},
+  {code:"pg", nom:"Papouasie-Nouvelle-Guinée", continent:"Océanie", cap:"Port Moresby"},
+  {code:"ws", nom:"Samoa", continent:"Océanie", cap:"Apia"},
+  {code:"to", nom:"Tonga", continent:"Océanie", cap:"Nuku'alofa"},
+  {code:"tv", nom:"Tuvalu", continent:"Océanie", cap:"Funafuti"},
+  {code:"vu", nom:"Vanuatu", continent:"Océanie", cap:"Port-Vila"},
+  {code:"ck", nom:"Îles Cook", continent:"Océanie", cap:"Avarua"},
+  {code:"mh", nom:"Îles Marshall", continent:"Océanie", cap:"Majuro"},
+  {code:"sb", nom:"Îles Salomon", continent:"Océanie", cap:"Honiara"},
 ];
 
 // pays sans fichier dans contours/ : exclus uniquement du quiz Contours
@@ -450,7 +465,7 @@ let index = 0;
 let score = 0;
 let format = 'qcm';          // 'qcm' ou 'saisie'
 let repondu = false;         // évite de valider deux fois la même question
-let modeActuel = 'drapeaux'; // 'drapeaux' ou 'contours'
+let modeActuel = 'drapeaux'; // 'drapeaux', 'contours' ou 'capitales'  ★
 
 // mélange un tableau
 function melange(tab){
@@ -469,6 +484,23 @@ function normaliser(s){
     .replace(/[^a-z0-9]/g,'');                        // enlève espaces, tirets, apostrophes
 }
 
+/* ★ CAPITALES : deux petites fonctions utilitaires.
+   - libelleReponse : le texte à afficher/attendre selon le mode
+     (nom du pays pour Drapeaux/Contours, capitale pour Capitales)
+   - bonneSaisie : vérifie la saisie, en acceptant aussi les
+     variantes listées dans capAlt (ex. "La Haye", "Beijing"…) */
+function libelleReponse(pays){
+  return modeActuel === 'capitales' ? pays.cap : pays.nom;
+}
+function bonneSaisie(valeur, bonPays){
+  const v = normaliser(valeur);
+  if(v === normaliser(libelleReponse(bonPays))) return true;
+  if(modeActuel === 'capitales' && bonPays.capAlt){
+    return bonPays.capAlt.some(alt => v === normaliser(alt));
+  }
+  return false;
+}
+
 function choisirFormat(f){
   format = f;
   document.querySelectorAll('#segFormat button').forEach(b => {
@@ -484,6 +516,7 @@ function afficherEcran(id){
 
 function startQuiz(mode){
   modeActuel = mode;
+  // Capitales utilise tous les pays (le drapeau a un secours en ligne)
   const pool = mode === 'contours' ? PAYS_CONTOURS : PAYS;
   partie = melange(pool).slice(0, NB_QUESTIONS);
   index = 0; score = 0;
@@ -511,14 +544,31 @@ function poserQuestion(){
   repondu = false;
   majDots();
 
-  // l'image : drapeau (avec secours en ligne) ou contour (fichier local uniquement)
   const img = document.getElementById('flagImg');
+  const label = document.getElementById('qLabel');      // ★
+  const nomEl = document.getElementById('paysNom');     // ★
   img.classList.toggle('contour-img', modeActuel === 'contours');
+
   if(modeActuel === 'contours'){
+    label.textContent = 'Quel est ce pays ?';
+    nomEl.style.display = 'none';
     img.onerror = null;
     img.alt = 'Silhouette du pays à identifier';
     img.src = contourUrlLocal(bonPays.code);
+
+  } else if(modeActuel === 'capitales'){
+    /* ★ CAPITALES : on montre le drapeau ET le nom du pays,
+       la question porte sur la capitale */
+    label.textContent = 'Quelle est la capitale de ce pays ?';
+    nomEl.style.display = 'block';
+    nomEl.textContent = bonPays.nom;
+    img.onerror = () => { img.onerror = null; img.src = flagUrlSecours(bonPays.code); };
+    img.alt = 'Drapeau : ' + bonPays.nom;
+    img.src = flagUrlLocal(bonPays.code);
+
   } else {
+    label.textContent = 'Quel est ce pays ?';
+    nomEl.style.display = 'none';
     img.onerror = () => { img.onerror = null; img.src = flagUrlSecours(bonPays.code); };
     img.alt = 'Drapeau à identifier';
     img.src = flagUrlLocal(bonPays.code);
@@ -548,7 +598,8 @@ function poserQCM(bonPays){
   choix.forEach(pays => {
     const b = document.createElement('button');
     b.className = 'ans';
-    b.textContent = pays.nom;
+    b.textContent = libelleReponse(pays);   // ★ nom du pays OU sa capitale
+    b.dataset.code = pays.code;             // ★ repère fiable pour retrouver la bonne réponse
     b.onclick = () => repondreQCM(b, pays, bonPays);
     box.appendChild(b);
   });
@@ -558,7 +609,7 @@ function repondreQCM(bouton, choisi, bonPays){
   repondu = true;
   document.querySelectorAll('.ans').forEach(b => {
     b.disabled = true;
-    if(b.textContent === bonPays.nom) b.classList.add('correct');
+    if(b.dataset.code === bonPays.code) b.classList.add('correct');  // ★ comparaison par code, plus par texte
   });
   if(choisi.code === bonPays.code){
     score++; document.getElementById('scoreVal').textContent = score;
@@ -577,6 +628,8 @@ function poserSaisie(bonPays){
   const verdict = document.getElementById('verdict');
   input.value = '';
   input.disabled = false;
+  /* ★ CAPITALES : placeholder adapté au mode */
+  input.placeholder = modeActuel === 'capitales' ? 'Écris le nom de la capitale…' : 'Écris le nom du pays…';
   verdict.textContent = '';
   verdict.className = 'verdict';
   document.getElementById('validerBtn').disabled = false;
@@ -595,13 +648,13 @@ function validerSaisie(){
   input.disabled = true;
   document.getElementById('validerBtn').disabled = true;
 
-  if(normaliser(input.value) === normaliser(bonPays.nom)){
+  if(bonneSaisie(input.value, bonPays)){   // ★ gère nom OU capitale (+ variantes)
     score++; document.getElementById('scoreVal').textContent = score;
     verdict.className = 'verdict ok';
     verdict.textContent = '✓ Correct !';
   } else {
     verdict.className = 'verdict ko';
-    verdict.innerHTML = '✗ Raté. C\'était <b>' + bonPays.nom + '</b>.';
+    verdict.innerHTML = '✗ Raté. C\'était <b>' + libelleReponse(bonPays) + '</b>.';
   }
   montrerSuivant();
 }
