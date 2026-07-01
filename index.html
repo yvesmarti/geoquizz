@@ -88,6 +88,7 @@
   .flag-card .q-label{font-size:13px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px}
   .flag-img{width:100%;max-width:300px;aspect-ratio:3/2;object-fit:cover;border-radius:8px;margin:0 auto;display:block;
     box-shadow:0 8px 30px rgba(0,0,0,.35);background:var(--panel-2)}
+  .flag-img.contour-img{aspect-ratio:1/1;object-fit:contain;padding:14px;filter:invert(1) drop-shadow(0 8px 20px rgba(0,0,0,.45))}
 
   /* réponses QCM */
   .answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
@@ -141,7 +142,7 @@
   <!-- ============ ÉCRAN 1 : ACCUEIL ============ -->
   <section class="screen active" id="screen-home">
     <h1 class="hero-h1">Reconnais-tu<br>le monde&nbsp;? <em>▸</em></h1>
-    <p class="hero-p">Trois façons de tester ta géographie. Commence par les drapeaux, les autres modules arrivent bientôt.</p>
+    <p class="hero-p">Trois façons de tester ta géographie. Drapeaux et contours sont jouables, les hymnes arrivent bientôt.</p>
 
     <div class="format">
       <span class="lbl">Réponses</span>
@@ -157,10 +158,10 @@
         <span class="m-txt"><b>Drapeaux</b><small>Devine le pays d'après son drapeau</small></span>
         <span class="badge on">Jouable</span>
       </button>
-      <button class="mode soon" disabled>
+      <button class="mode" onclick="startQuiz('contours')">
         <span class="emoji">🗺️</span>
         <span class="m-txt"><b>Contours</b><small>Devine le pays d'après sa forme</small></span>
-        <span class="badge off">Bientôt</span>
+        <span class="badge on">Jouable</span>
       </button>
       <button class="mode soon" disabled>
         <span class="emoji">🎵</span>
@@ -206,7 +207,7 @@
       <h2 id="resultTitle">Bien joué&nbsp;!</h2>
       <p id="resultMsg"></p>
       <div class="btns">
-        <button class="btn" onclick="startQuiz('drapeaux')">Rejouer</button>
+        <button class="btn" onclick="startQuiz(modeActuel)">Rejouer</button>
         <button class="btn ghost" onclick="goHome()">Menu</button>
       </div>
     </div>
@@ -244,6 +245,8 @@ const PAYS = [
   {code:"hr", nom:"Croatie", continent:"Europe"},
   {code:"dk", nom:"Danemark", continent:"Europe"},
   {code:"ee", nom:"Estonie", continent:"Europe"},
+  {code:"fi", nom:"Finlande", continent:"Europe"},
+  {code:"hu", nom:"Hongrie", continent:"Europe"},
   {code:"is", nom:"Islande", continent:"Europe"},
   {code:"xk", nom:"Kosovo", continent:"Europe"},
   {code:"lv", nom:"Lettonie", continent:"Europe"},
@@ -262,6 +265,7 @@ const PAYS = [
   {code:"sk", nom:"Slovaquie", continent:"Europe"},
   {code:"si", nom:"Slovénie", continent:"Europe"},
   {code:"cz", nom:"Tchéquie", continent:"Europe"},
+  {code:"ua", nom:"Ukraine", continent:"Europe"},
   {code:"va", nom:"Vatican", continent:"Europe"},
 
   {code:"us", nom:"États-Unis",      continent:"Amériques"},
@@ -283,6 +287,9 @@ const PAYS = [
   {code:"gd", nom:"Grenade", continent:"Amériques"},
   {code:"gt", nom:"Guatemala", continent:"Amériques"},
   {code:"gy", nom:"Guyana", continent:"Amériques"},
+  {code:"ht", nom:"Haïti", continent:"Amériques"},
+  {code:"hn", nom:"Honduras", continent:"Amériques"},
+  {code:"jm", nom:"Jamaïque", continent:"Amériques"},
   {code:"ni", nom:"Nicaragua", continent:"Amériques"},
   {code:"pa", nom:"Panama", continent:"Amériques"},
   {code:"py", nom:"Paraguay", continent:"Amériques"},
@@ -293,6 +300,7 @@ const PAYS = [
   {code:"sv", nom:"Salvador", continent:"Amériques"},
   {code:"sr", nom:"Suriname", continent:"Amériques"},
   {code:"tt", nom:"Trinité-et-Tobago", continent:"Amériques"},
+  {code:"uy", nom:"Uruguay", continent:"Amériques"},
   {code:"ve", nom:"Venezuela", continent:"Amériques"},
   {code:"ec", nom:"Équateur", continent:"Amériques"},
 
@@ -318,6 +326,7 @@ const PAYS = [
   {code:"iq", nom:"Irak", continent:"Asie"},
   {code:"ir", nom:"Iran", continent:"Asie"},
   {code:"il", nom:"Israël", continent:"Asie"},
+  {code:"jo", nom:"Jordanie", continent:"Asie"},
   {code:"kz", nom:"Kazakhstan", continent:"Asie"},
   {code:"kg", nom:"Kirghizistan", continent:"Asie"},
   {code:"kw", nom:"Koweït", continent:"Asie"},
@@ -328,16 +337,20 @@ const PAYS = [
   {code:"mn", nom:"Mongolie", continent:"Asie"},
   {code:"mm", nom:"Myanmar", continent:"Asie"},
   {code:"np", nom:"Népal", continent:"Asie"},
+  {code:"om", nom:"Oman", continent:"Asie"},
   {code:"pk", nom:"Pakistan", continent:"Asie"},
   {code:"ps", nom:"Palestine", continent:"Asie"},
   {code:"ph", nom:"Philippines", continent:"Asie"},
+  {code:"qa", nom:"Qatar", continent:"Asie"},
   {code:"sg", nom:"Singapour", continent:"Asie"},
   {code:"lk", nom:"Sri Lanka", continent:"Asie"},
   {code:"sy", nom:"Syrie", continent:"Asie"},
   {code:"tj", nom:"Tadjikistan", continent:"Asie"},
   {code:"tl", nom:"Timor oriental", continent:"Asie"},
   {code:"tm", nom:"Turkménistan", continent:"Asie"},
+  {code:"uz", nom:"Ouzbékistan", continent:"Asie"},
   {code:"ae", nom:"Émirats arabes unis", continent:"Asie"},
+  {code:"ye", nom:"Yémen", continent:"Asie"},
 
   {code:"ma", nom:"Maroc",           continent:"Afrique"},
   {code:"dz", nom:"Algérie",         continent:"Afrique"},
@@ -376,6 +389,7 @@ const PAYS = [
   {code:"mz", nom:"Mozambique", continent:"Afrique"},
   {code:"na", nom:"Namibie", continent:"Afrique"},
   {code:"ne", nom:"Niger", continent:"Afrique"},
+  {code:"ug", nom:"Ouganda", continent:"Afrique"},
   {code:"rw", nom:"Rwanda", continent:"Afrique"},
   {code:"cf", nom:"République centrafricaine", continent:"Afrique"},
   {code:"cd", nom:"République démocratique du Congo", continent:"Afrique"},
@@ -390,9 +404,12 @@ const PAYS = [
   {code:"tg", nom:"Togo", continent:"Afrique"},
   {code:"er", nom:"Érythrée", continent:"Afrique"},
   {code:"et", nom:"Éthiopie", continent:"Afrique"},
+  {code:"zm", nom:"Zambie", continent:"Afrique"},
+  {code:"zw", nom:"Zimbabwe", continent:"Afrique"},
 
   {code:"au", nom:"Australie",       continent:"Océanie"},
   {code:"nz", nom:"Nouvelle-Zélande",continent:"Océanie"},
+  {code:"fj", nom:"Fidji", continent:"Océanie"},
   {code:"ki", nom:"Kiribati", continent:"Océanie"},
   {code:"fm", nom:"Micronésie", continent:"Océanie"},
   {code:"nr", nom:"Nauru", continent:"Océanie"},
@@ -408,14 +425,21 @@ const PAYS = [
   {code:"sb", nom:"Îles Salomon", continent:"Océanie"},
 ];
 
+// pays sans fichier dans contours/ : exclus uniquement du quiz Contours
+const PAYS_SANS_CONTOUR = ['fm','mh','ps','tv','xk'];
+const PAYS_CONTOURS = PAYS.filter(p => !PAYS_SANS_CONTOUR.includes(p.code));
+
 /* =====================================================================
-   2) OÙ TROUVER LE DRAPEAU
+   2) OÙ TROUVER LE DRAPEAU / LE CONTOUR
    On cherche D'ABORD ton fichier local (dossier "drapeaux"). Si le
    fichier n'existe pas encore, on bascule automatiquement sur l'image
-   en ligne (voir la fonction poserQuestion, plus bas).
+   en ligne (voir la fonction poserQuestion, plus bas). Les contours
+   n'ont pas de secours en ligne : PAYS_CONTOURS ne contient que les
+   pays pour lesquels le fichier existe déjà.
    ===================================================================== */
 function flagUrlLocal(code){ return `drapeaux/${code.toUpperCase()}.svg`; } // TES fichiers
 function flagUrlSecours(code){ return `https://flagcdn.com/w320/${code}.png`; } // secours en ligne
+function contourUrlLocal(code){ return `contours/${code}.svg`; }
 
 /* =====================================================================
    3) LE MOTEUR DE JEU
@@ -426,6 +450,7 @@ let index = 0;
 let score = 0;
 let format = 'qcm';          // 'qcm' ou 'saisie'
 let repondu = false;         // évite de valider deux fois la même question
+let modeActuel = 'drapeaux'; // 'drapeaux' ou 'contours'
 
 // mélange un tableau
 function melange(tab){
@@ -458,7 +483,9 @@ function afficherEcran(id){
 }
 
 function startQuiz(mode){
-  partie = melange(PAYS).slice(0, NB_QUESTIONS);
+  modeActuel = mode;
+  const pool = mode === 'contours' ? PAYS_CONTOURS : PAYS;
+  partie = melange(pool).slice(0, NB_QUESTIONS);
   index = 0; score = 0;
   document.getElementById('scoreVal').textContent = 0;
   construireDots();
@@ -484,10 +511,18 @@ function poserQuestion(){
   repondu = false;
   majDots();
 
-  // le drapeau : ton fichier, avec secours automatique s'il manque
+  // l'image : drapeau (avec secours en ligne) ou contour (fichier local uniquement)
   const img = document.getElementById('flagImg');
-  img.onerror = () => { img.onerror = null; img.src = flagUrlSecours(bonPays.code); };
-  img.src = flagUrlLocal(bonPays.code);
+  img.classList.toggle('contour-img', modeActuel === 'contours');
+  if(modeActuel === 'contours'){
+    img.onerror = null;
+    img.alt = 'Silhouette du pays à identifier';
+    img.src = contourUrlLocal(bonPays.code);
+  } else {
+    img.onerror = () => { img.onerror = null; img.src = flagUrlSecours(bonPays.code); };
+    img.alt = 'Drapeau à identifier';
+    img.src = flagUrlLocal(bonPays.code);
+  }
 
   document.getElementById('nextBtn').style.display = 'none';
 
