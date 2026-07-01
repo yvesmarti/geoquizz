@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Atlas — Quiz géographique</title>
+<!-- ★ MOBILE : description pour Google, couleur de la barre du navigateur
+     sur téléphone, et favicon (l'icône dans l'onglet) en SVG intégré -->
+<meta name="description" content="Atlas : quiz géographique gratuit. Drapeaux, contours, capitales… Teste tes connaissances du monde en QCM ou en saisie libre.">
+<meta name="theme-color" content="#0f1a2b">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='18' fill='%230f1a2b'/%3E%3Cpath d='M20 3 L23 20 L20 37 L17 20 Z' fill='%23e6b74d'/%3E%3Cpath d='M3 20 L20 17 L37 20 L20 23 Z' fill='%23e6b74d' opacity='.55'/%3E%3C/svg%3E">
+<!-- ★ ÉCRAN D'ACCUEIL : le "manifest" décrit le site comme une appli
+     (nom, icône, couleurs). Une fois ajouté à l'écran d'accueil du
+     téléphone, Atlas s'ouvre en plein écran, sans barre d'adresse. -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png"><!-- icône pour iPhone/iPad -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -27,7 +37,9 @@
     background-image:
       linear-gradient(var(--line) 1px,transparent 1px),
       linear-gradient(90deg,var(--line) 1px,transparent 1px);
-    background-size:48px 48px;min-height:100vh;line-height:1.55;-webkit-font-smoothing:antialiased;
+    background-size:48px 48px;min-height:100vh;min-height:100dvh;line-height:1.55;-webkit-font-smoothing:antialiased;
+    /* ★ MOBILE : 100dvh = hauteur réelle de l'écran sur téléphone,
+       en tenant compte de la barre d'adresse qui apparaît/disparaît */
   }
   .display{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;line-height:1.05}
 
@@ -106,6 +118,41 @@
   .ans:disabled{cursor:default}
   .ans.correct{background:rgba(63,182,139,.16);border-color:var(--ok);color:#c7f2e1}
   .ans.wrong{background:rgba(226,96,76,.14);border-color:var(--ko);color:#f6cabf}
+
+  /* ====================================================================
+     ★ FEEDBACK : animations bonne / mauvaise réponse.
+     @keyframes = décrit les étapes d'une animation (0% → 100%).
+     La bonne réponse "rebondit", la mauvaise "tremble" (comme un
+     mot de passe erroné), et un ✓ ou ✗ apparaît sur le bouton.
+     ==================================================================== */
+  @keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.05)}100%{transform:scale(1)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+  @keyframes fadein{from{opacity:0;transform:translateY(-50%) scale(.4)}to{opacity:1;transform:translateY(-50%) scale(1)}}
+  .ans{position:relative}
+  .ans.correct{animation:pop .4s ease}
+  .ans.wrong{animation:shake .45s ease}
+  .ans.correct::after,.ans.wrong::after{
+    position:absolute;right:14px;top:50%;transform:translateY(-50%);
+    font-size:19px;font-weight:700;animation:fadein .3s ease both .1s;
+  }
+  .ans.correct::after{content:"✓";color:var(--ok)}
+  .ans.wrong::after{content:"✗";color:var(--ko)}
+  /* mode inversé : le picto s'affiche en médaillon au centre du drapeau */
+  .flag-ans.correct::after,.flag-ans.wrong::after{
+    right:auto;left:50%;top:50%;margin-left:-22px;margin-top:-22px;transform:none;
+    width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+    font-size:24px;background:rgba(15,26,43,.88);
+    animation:fadein-c .3s ease both .1s;
+  }
+  @keyframes fadein-c{from{opacity:0;scale:.4}to{opacity:1;scale:1}}
+  /* le score rebondit en doré quand il augmente */
+  .score b{display:inline-block}
+  .score b.bump{animation:pop .4s ease}
+  /* saisie libre : mêmes retours sur le champ et le verdict */
+  .saisie input.wrong{border-color:var(--ko);animation:shake .45s ease}
+  .saisie input.correct{border-color:var(--ok)}
+  .saisie .verdict{animation:none}
+  .saisie .verdict.ok,.saisie .verdict.ko{animation:fadein-c .3s ease both}
   /* ★ INVERSÉ : boutons de réponse contenant un drapeau au lieu d'un texte */
   .ans.flag-ans{padding:10px}
   .ans.flag-ans img{width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:7px;display:block;background:var(--panel-2)}
@@ -144,8 +191,43 @@
   .err-item .txt small{color:var(--muted);font-size:13.5px}
   .err-item .txt small span{color:var(--ko)}
 
-  @media(max-width:400px){.answers{grid-template-columns:1fr}}
-  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+  /* ====================================================================
+     ★ MOBILE : tout ce bloc ne s'applique qu'aux écrans étroits.
+     Une "media query" = des règles CSS activées seulement sous une
+     certaine largeur d'écran (ici 540px, puis 400px).
+     ==================================================================== */
+  @media(max-width:540px){
+    .app{padding:18px 14px 40px}
+    .top{margin-bottom:24px}
+    /* réglages de l'accueil : le libellé passe au-dessus des boutons */
+    .format{flex-direction:column;align-items:flex-start;gap:8px}
+    .format .lbl{min-width:0}
+    .seg{flex-wrap:wrap}                 /* les boutons peuvent aller à la ligne */
+    .seg button{padding:8px 13px}
+    .mode{padding:16px;gap:14px}
+    .mode .emoji{font-size:26px}
+    .flag-card{padding:20px 16px}
+    .ans{padding:14px 15px}
+    /* champ de saisie : le bouton Valider passe sous le champ si trop étroit */
+    .saisie .row{flex-wrap:wrap}
+    .saisie .row .btn{flex:1}
+  }
+  @media(max-width:400px){
+    .answers{grid-template-columns:1fr}  /* réponses texte : 1 colonne, plus lisible */
+  }
+  /* …sauf en mode inversé : les drapeaux restent sur 2 colonnes, sinon
+     ils deviennent énormes. :has() = "si le bloc contient un drapeau" */
+  .answers:has(.flag-ans){grid-template-columns:1fr 1fr}
+
+  /* ★ MOBILE : sur écran tactile (hover:none), on neutralise les effets
+     de survol qui "collent" au doigt après un tap */
+  @media(hover:none){
+    .mode:not(.soon):hover{transform:none;border-color:var(--line);background:var(--panel)}
+    .ans:not(:disabled):hover{background:var(--panel);border-color:var(--line)}
+    .btn:hover{filter:none}
+  }
+
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
   :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 </style>
 </head>
@@ -263,6 +345,8 @@
       <div class="big"><span id="finalScore">0</span><small>/<span id="finalTotal">10</span></small></div>
       <h2 id="resultTitle">Bien joué&nbsp;!</h2>
       <p id="resultMsg"></p>
+      <!-- ★ RECORD : meilleur score enregistré dans le navigateur -->
+      <p id="recordMsg" style="margin-top:-18px;font-size:14px"></p>
       <div class="btns">
         <button class="btn" onclick="startQuiz(modeActuel)">Rejouer</button>
         <button class="btn ghost" onclick="goHome()">Menu</button>
@@ -663,6 +747,20 @@ function poserQuestion(){
 
   document.getElementById('nextBtn').style.display = 'none';
 
+  /* ★ FLUIDITÉ : on télécharge discrètement l'image de la question
+     SUIVANTE pendant que le joueur réfléchit. Résultat : plus de temps
+     de chargement visible entre deux questions (utile en 4G). */
+  const suivant = partie[index + 1];
+  if(suivant){
+    const pre = new Image();
+    if(modeActuel === 'contours'){
+      pre.src = contourUrlLocal(suivant.code);
+    } else {
+      pre.onerror = () => { pre.onerror = null; pre.src = flagUrlSecours(suivant.code); };
+      pre.src = flagUrlLocal(suivant.code);
+    }
+  }
+
   /* ★ INVERSÉ : ce mode est toujours en QCM (on clique sur un drapeau),
      quel que soit le format choisi à l'accueil */
   if(modeActuel === 'inverse') poserQCM(bonPays);
@@ -712,13 +810,25 @@ function repondreQCM(bouton, choisi, bonPays){
     if(b.dataset.code === bonPays.code) b.classList.add('correct');
   });
   if(choisi.code === bonPays.code){
-    score++; document.getElementById('scoreVal').textContent = score;
+    score++;
+    bumpScore();   // ★ FEEDBACK : petit rebond du compteur de score
   } else {
     bouton.classList.add('wrong');
     /* ★ RÉCAP : on note l'erreur (le pays + ce que le joueur a répondu) */
     erreurs.push({pays: bonPays, donnee: choisi.nom});
   }
   montrerSuivant();
+}
+
+/* ★ FEEDBACK : met à jour le score avec un rebond. L'astuce
+   "void offsetWidth" force le navigateur à redémarrer l'animation
+   même si la classe était déjà présente. */
+function bumpScore(){
+  const sv = document.getElementById('scoreVal');
+  sv.textContent = score;
+  sv.classList.remove('bump');
+  void sv.offsetWidth;
+  sv.classList.add('bump');
 }
 
 /* ---- mode SAISIE ---- */
@@ -730,6 +840,7 @@ function poserSaisie(bonPays){
   const verdict = document.getElementById('verdict');
   input.value = '';
   input.disabled = false;
+  input.classList.remove('correct','wrong');   // ★ FEEDBACK : on repart propre
   input.placeholder = modeActuel === 'capitales' ? 'Écris le nom de la capitale…' : 'Écris le nom du pays…';
   verdict.textContent = '';
   verdict.className = 'verdict';
@@ -750,10 +861,13 @@ function validerSaisie(){
   document.getElementById('validerBtn').disabled = true;
 
   if(bonneSaisie(input.value, bonPays)){
-    score++; document.getElementById('scoreVal').textContent = score;
+    score++;
+    bumpScore();                        // ★ FEEDBACK : rebond du score
+    input.classList.add('correct');     // bordure verte sur le champ
     verdict.className = 'verdict ok';
     verdict.textContent = '✓ Correct !';
   } else {
+    input.classList.add('wrong');       // ★ FEEDBACK : le champ tremble en rouge
     verdict.className = 'verdict ko';
     verdict.innerHTML = '✗ Raté. C\'était <b>' + libelleReponse(bonPays) + '</b>.';
     /* ★ RÉCAP : on note l'erreur avec la saisie du joueur */
@@ -785,6 +899,22 @@ function afficherResultat(){
   else { titre = "En route&nbsp;!"; msg = "Le monde est vaste, rejoue pour progresser."; }
   document.getElementById('resultTitle').innerHTML = titre;
   document.getElementById('resultMsg').textContent = msg;
+
+  /* ★ RECORD : localStorage = petite mémoire du navigateur qui survit
+     à la fermeture de la page. On garde le meilleur pourcentage par mode. */
+  const pct = Math.round(ratio * 100);
+  const cle = 'atlas-record-' + modeActuel;
+  const ancien = +(localStorage.getItem(cle) || 0);
+  const recEl = document.getElementById('recordMsg');
+  if(pct > ancien){
+    localStorage.setItem(cle, pct);
+    recEl.textContent = '🏆 Nouveau record : ' + pct + ' % de bonnes réponses !';
+    recEl.style.color = 'var(--gold)';
+  } else {
+    recEl.textContent = 'Ton record dans ce mode : ' + ancien + ' %';
+    recEl.style.color = 'var(--muted)';
+  }
+
   construireRecap();   // ★ RÉCAP
   afficherEcran('screen-result');
 }
@@ -837,6 +967,17 @@ function construireRecap(){
 }
 
 function goHome(){ afficherEcran('screen-home'); }
+
+/* ★ CLAVIER : sur ordinateur, les touches 1 à 4 répondent au QCM.
+   Sans effet sur téléphone, et ignoré pendant la saisie libre. */
+document.addEventListener('keydown', (e) => {
+  if(!document.getElementById('screen-quiz').classList.contains('active')) return;
+  if(repondu || document.activeElement.tagName === 'INPUT') return;
+  const n = ['1','2','3','4'].indexOf(e.key);
+  if(n === -1) return;
+  const boutons = document.querySelectorAll('#answers .ans');
+  if(boutons[n]) boutons[n].click();
+});
 </script>
 </body>
 </html>
