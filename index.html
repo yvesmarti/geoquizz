@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas — Quiz géographique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ====================================================================
+     TOKENS — toute l'identité visuelle est réglée ici (couleurs, etc.)
+     Thème : « atlas de nuit ». Fond sombre pour faire ressortir les
+     drapeaux, accent doré (boussole), méridiens en filigrane.
+     ==================================================================== */
+  :root{
+    --bg:#0f1a2b; --panel:#17253c; --panel-2:#1e304c;
+    --line:rgba(255,255,255,.09);
+    --text:#eaf1f9; --muted:#8ea6c2;
+    --gold:#e6b74d; --ok:#3fb68b; --ko:#e2604c;
+    --radius:14px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--bg);
+    background-image:
+      linear-gradient(var(--line) 1px,transparent 1px),
+      linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:48px 48px;min-height:100vh;line-height:1.55;-webkit-font-smoothing:antialiased;
+  }
+  .display{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;line-height:1.05}
+
+  .app{max-width:640px;margin:0 auto;padding:28px 20px 60px;min-height:100vh;display:flex;flex-direction:column}
+
+  .top{display:flex;align-items:center;gap:12px;margin-bottom:36px}
+  .rose{width:38px;height:38px;flex-shrink:0}
+  .top b{font-family:'Bricolage Grotesque';font-size:20px;font-weight:800;letter-spacing:-.01em}
+  .top span{font-size:12px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;display:block;margin-top:-2px}
+
+  .screen{display:none;flex:1;flex-direction:column}
+  .screen.active{display:flex}
+
+  .btn{font-family:'Inter';font-size:16px;font-weight:600;cursor:pointer;border:none;border-radius:10px;
+    padding:14px 22px;background:var(--gold);color:#241a03;transition:transform .12s,filter .12s}
+  .btn:hover{filter:brightness(1.06)}
+  .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+  .btn.ghost:hover{background:var(--panel-2);filter:none}
+
+  /* ===== ACCUEIL ===== */
+  .hero-h1{font-family:'Bricolage Grotesque';font-weight:800;font-size:clamp(30px,7vw,42px);letter-spacing:-.02em;margin-bottom:10px}
+  .hero-h1 em{font-style:normal;color:var(--gold)}
+  .hero-p{color:var(--muted);font-size:16px;margin-bottom:26px;max-width:440px}
+
+  /* sélecteur de format (QCM / Saisie) */
+  .format{display:flex;align-items:center;gap:12px;margin-bottom:30px;flex-wrap:wrap}
+  .format .lbl{font-size:13px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+  .seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px}
+  .seg button{font-family:'Inter';font-size:14px;font-weight:600;cursor:pointer;border:none;background:transparent;
+    color:var(--muted);padding:8px 16px;border-radius:7px;transition:background .15s,color .15s}
+  .seg button.on{background:var(--gold);color:#241a03}
+
+  .modes{display:flex;flex-direction:column;gap:14px}
+  .mode{display:flex;align-items:center;gap:18px;text-align:left;width:100%;background:var(--panel);
+    border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;cursor:pointer;
+    transition:border-color .15s,background .15s,transform .15s;font-family:'Inter';color:var(--text)}
+  .mode:not(.soon):hover{background:var(--panel-2);border-color:var(--gold);transform:translateY(-2px)}
+  .mode .emoji{font-size:30px;flex-shrink:0}
+  .mode .m-txt{flex:1}
+  .mode .m-txt b{font-family:'Bricolage Grotesque';font-size:18px;font-weight:700;display:block}
+  .mode .m-txt small{color:var(--muted);font-size:14px}
+  .mode .badge{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;padding:5px 10px;border-radius:20px}
+  .badge.on{background:rgba(63,182,139,.15);color:var(--ok)}
+  .badge.off{background:rgba(255,255,255,.06);color:var(--muted)}
+  .mode.soon{opacity:.55;cursor:not-allowed}
+
+  /* ===== QUIZ ===== */
+  .quiz-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+  .score{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px}
+  .score b{color:var(--gold);font-size:20px}
+  .dots{display:flex;gap:6px}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+  .dot.done{background:var(--muted)}
+  .dot.now{background:var(--gold);transform:scale(1.25)}
+
+  .flag-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:28px;text-align:center;margin-bottom:22px}
+  .flag-card .q-label{font-size:13px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px}
+  .flag-img{width:100%;max-width:300px;aspect-ratio:3/2;object-fit:cover;border-radius:8px;margin:0 auto;display:block;
+    box-shadow:0 8px 30px rgba(0,0,0,.35);background:var(--panel-2)}
+
+  /* réponses QCM */
+  .answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+  .ans{font-family:'Inter';font-size:16px;font-weight:500;text-align:left;cursor:pointer;background:var(--panel);
+    border:1px solid var(--line);border-radius:11px;padding:16px 18px;color:var(--text);transition:background .12s,border-color .12s}
+  .ans:not(:disabled):hover{background:var(--panel-2);border-color:var(--muted)}
+  .ans:disabled{cursor:default}
+  .ans.correct{background:rgba(63,182,139,.16);border-color:var(--ok);color:#c7f2e1}
+  .ans.wrong{background:rgba(226,96,76,.14);border-color:var(--ko);color:#f6cabf}
+
+  /* réponse SAISIE */
+  .saisie{margin-bottom:20px}
+  .saisie .row{display:flex;gap:10px}
+  .saisie input{flex:1;font-family:'Inter';font-size:16px;background:var(--panel);border:1px solid var(--line);
+    border-radius:11px;padding:15px 18px;color:var(--text)}
+  .saisie input::placeholder{color:var(--muted)}
+  .saisie input:disabled{opacity:.7}
+  .saisie .verdict{margin-top:14px;font-size:15px;min-height:22px}
+  .saisie .verdict.ok{color:var(--ok)}
+  .saisie .verdict.ko{color:var(--ko)}
+  .saisie .verdict b{color:var(--text)}
+
+  .next-row{display:flex;justify-content:flex-end;min-height:52px;align-items:center}
+  #nextBtn{display:none}
+
+  /* ===== RÉSULTAT ===== */
+  .result{text-align:center;margin-top:40px}
+  .result .big{font-family:'Bricolage Grotesque';font-weight:800;font-size:clamp(48px,14vw,80px);color:var(--gold);line-height:1}
+  .result .big small{font-size:.4em;color:var(--muted);font-weight:600}
+  .result h2{font-family:'Bricolage Grotesque';font-size:24px;margin:16px 0 8px}
+  .result p{color:var(--muted);margin-bottom:30px}
+  .result .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+  @media(max-width:400px){.answers{grid-template-columns:1fr}}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="top">
+    <svg class="rose" viewBox="0 0 40 40" fill="none">
+      <circle cx="20" cy="20" r="18" stroke="var(--gold)" stroke-width="1.2" opacity=".5"/>
+      <path d="M20 3 L23 20 L20 37 L17 20 Z" fill="var(--gold)"/>
+      <path d="M3 20 L20 17 L37 20 L20 23 Z" fill="var(--gold)" opacity=".55"/>
+    </svg>
+    <div><b>Atlas</b><span>Quiz géographique</span></div>
+  </div>
+
+  <!-- ============ ÉCRAN 1 : ACCUEIL ============ -->
+  <section class="screen active" id="screen-home">
+    <h1 class="hero-h1">Reconnais-tu<br>le monde&nbsp;? <em>▸</em></h1>
+    <p class="hero-p">Trois façons de tester ta géographie. Commence par les drapeaux, les autres modules arrivent bientôt.</p>
+
+    <div class="format">
+      <span class="lbl">Réponses</span>
+      <div class="seg" id="segFormat">
+        <button class="on" data-format="qcm" onclick="choisirFormat('qcm')">QCM à 4 choix</button>
+        <button data-format="saisie" onclick="choisirFormat('saisie')">Saisie libre</button>
+      </div>
+    </div>
+
+    <div class="modes">
+      <button class="mode" onclick="startQuiz('drapeaux')">
+        <span class="emoji">🚩</span>
+        <span class="m-txt"><b>Drapeaux</b><small>Devine le pays d'après son drapeau</small></span>
+        <span class="badge on">Jouable</span>
+      </button>
+      <button class="mode soon" disabled>
+        <span class="emoji">🗺️</span>
+        <span class="m-txt"><b>Contours</b><small>Devine le pays d'après sa forme</small></span>
+        <span class="badge off">Bientôt</span>
+      </button>
+      <button class="mode soon" disabled>
+        <span class="emoji">🎵</span>
+        <span class="m-txt"><b>Hymnes</b><small>Devine le pays d'après son hymne</small></span>
+        <span class="badge off">Bientôt</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ ÉCRAN 2 : QUIZ ============ -->
+  <section class="screen" id="screen-quiz">
+    <div class="quiz-head">
+      <div class="score">Score <b id="scoreVal">0</b></div>
+      <div class="dots" id="dots"></div>
+    </div>
+
+    <div class="flag-card">
+      <div class="q-label">Quel est ce pays&nbsp;?</div>
+      <img class="flag-img" id="flagImg" alt="Drapeau à identifier">
+    </div>
+
+    <!-- mode QCM -->
+    <div class="answers" id="answers"></div>
+
+    <!-- mode SAISIE -->
+    <div class="saisie" id="saisie" style="display:none">
+      <div class="row">
+        <input id="saisieInput" type="text" autocomplete="off" placeholder="Écris le nom du pays…">
+        <button class="btn" id="validerBtn" onclick="validerSaisie()">Valider</button>
+      </div>
+      <div class="verdict" id="verdict"></div>
+    </div>
+
+    <div class="next-row">
+      <button class="btn" id="nextBtn" onclick="nextQuestion()">Suivant →</button>
+    </div>
+  </section>
+
+  <!-- ============ ÉCRAN 3 : RÉSULTAT ============ -->
+  <section class="screen" id="screen-result">
+    <div class="result">
+      <div class="big"><span id="finalScore">0</span><small>/<span id="finalTotal">10</span></small></div>
+      <h2 id="resultTitle">Bien joué&nbsp;!</h2>
+      <p id="resultMsg"></p>
+      <div class="btns">
+        <button class="btn" onclick="startQuiz('drapeaux')">Rejouer</button>
+        <button class="btn ghost" onclick="goHome()">Menu</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* =====================================================================
+   1) LES DONNÉES  —  une ligne = un pays. Ajouter un pays = ajouter
+   une ligne. "code" = code ISO à 2 lettres, en minuscules.
+   ===================================================================== */
+const PAYS = [
+  {code:"fr", nom:"France",          continent:"Europe"},
+  {code:"de", nom:"Allemagne",       continent:"Europe"},
+  {code:"it", nom:"Italie",          continent:"Europe"},
+  {code:"es", nom:"Espagne",         continent:"Europe"},
+  {code:"pt", nom:"Portugal",        continent:"Europe"},
+  {code:"gb", nom:"Royaume-Uni",     continent:"Europe"},
+  {code:"ie", nom:"Irlande",         continent:"Europe"},
+  {code:"nl", nom:"Pays-Bas",        continent:"Europe"},
+  {code:"be", nom:"Belgique",        continent:"Europe"},
+  {code:"ch", nom:"Suisse",          continent:"Europe"},
+  {code:"se", nom:"Suède",           continent:"Europe"},
+  {code:"no", nom:"Norvège",         continent:"Europe"},
+  {code:"pl", nom:"Pologne",         continent:"Europe"},
+  {code:"gr", nom:"Grèce",           continent:"Europe"},
+  {code:"at", nom:"Autriche",        continent:"Europe"},
+
+  {code:"us", nom:"États-Unis",      continent:"Amériques"},
+  {code:"ca", nom:"Canada",          continent:"Amériques"},
+  {code:"mx", nom:"Mexique",         continent:"Amériques"},
+  {code:"br", nom:"Brésil",          continent:"Amériques"},
+  {code:"ar", nom:"Argentine",       continent:"Amériques"},
+  {code:"cl", nom:"Chili",           continent:"Amériques"},
+  {code:"co", nom:"Colombie",        continent:"Amériques"},
+  {code:"pe", nom:"Pérou",           continent:"Amériques"},
+
+  {code:"jp", nom:"Japon",           continent:"Asie"},
+  {code:"cn", nom:"Chine",           continent:"Asie"},
+  {code:"kr", nom:"Corée du Sud",    continent:"Asie"},
+  {code:"in", nom:"Inde",            continent:"Asie"},
+  {code:"th", nom:"Thaïlande",       continent:"Asie"},
+  {code:"vn", nom:"Viêt Nam",        continent:"Asie"},
+  {code:"id", nom:"Indonésie",       continent:"Asie"},
+  {code:"tr", nom:"Turquie",         continent:"Asie"},
+
+  {code:"ma", nom:"Maroc",           continent:"Afrique"},
+  {code:"dz", nom:"Algérie",         continent:"Afrique"},
+  {code:"tn", nom:"Tunisie",         continent:"Afrique"},
+  {code:"eg", nom:"Égypte",          continent:"Afrique"},
+  {code:"za", nom:"Afrique du Sud",  continent:"Afrique"},
+  {code:"sn", nom:"Sénégal",         continent:"Afrique"},
+  {code:"ng", nom:"Nigéria",         continent:"Afrique"},
+  {code:"ke", nom:"Kenya",           continent:"Afrique"},
+
+  {code:"au", nom:"Australie",       continent:"Océanie"},
+  {code:"nz", nom:"Nouvelle-Zélande",continent:"Océanie"},
+];
+
+/* =====================================================================
+   2) OÙ TROUVER LE DRAPEAU
+   On cherche D'ABORD ton fichier local (dossier "drapeaux"). Si le
+   fichier n'existe pas encore, on bascule automatiquement sur l'image
+   en ligne (voir la fonction poserQuestion, plus bas).
+   ===================================================================== */
+function flagUrlLocal(code){ return `drapeaux/${code}.svg`; }              // TES fichiers
+function flagUrlSecours(code){ return `https://flagcdn.com/w320/${code}.png`; } // secours en ligne
+
+/* =====================================================================
+   3) LE MOTEUR DE JEU
+   ===================================================================== */
+const NB_QUESTIONS = 10;
+let partie = [];
+let index = 0;
+let score = 0;
+let format = 'qcm';          // 'qcm' ou 'saisie'
+let repondu = false;         // évite de valider deux fois la même question
+
+// mélange un tableau
+function melange(tab){
+  const t = [...tab];
+  for(let i = t.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [t[i], t[j]] = [t[j], t[i]];
+  }
+  return t;
+}
+
+// enlève accents/majuscules/tirets pour comparer les saisies
+function normaliser(s){
+  return s.toLowerCase().trim()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // enlève les accents
+    .replace(/[^a-z0-9]/g,'');                        // enlève espaces, tirets, apostrophes
+}
+
+function choisirFormat(f){
+  format = f;
+  document.querySelectorAll('#segFormat button').forEach(b => {
+    b.classList.toggle('on', b.dataset.format === f);
+  });
+}
+
+function afficherEcran(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function startQuiz(mode){
+  partie = melange(PAYS).slice(0, NB_QUESTIONS);
+  index = 0; score = 0;
+  document.getElementById('scoreVal').textContent = 0;
+  construireDots();
+  afficherEcran('screen-quiz');
+  poserQuestion();
+}
+
+function construireDots(){
+  const box = document.getElementById('dots');
+  box.innerHTML = '';
+  for(let i = 0; i < partie.length; i++){
+    const d = document.createElement('span'); d.className = 'dot'; box.appendChild(d);
+  }
+}
+function majDots(){
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.className = 'dot' + (i < index ? ' done' : i === index ? ' now' : '');
+  });
+}
+
+function poserQuestion(){
+  const bonPays = partie[index];
+  repondu = false;
+  majDots();
+
+  // le drapeau : ton fichier, avec secours automatique s'il manque
+  const img = document.getElementById('flagImg');
+  img.onerror = () => { img.onerror = null; img.src = flagUrlSecours(bonPays.code); };
+  img.src = flagUrlLocal(bonPays.code);
+
+  document.getElementById('nextBtn').style.display = 'none';
+
+  if(format === 'qcm') poserQCM(bonPays);
+  else poserSaisie(bonPays);
+}
+
+/* ---- mode QCM ---- */
+function poserQCM(bonPays){
+  document.getElementById('answers').style.display = 'grid';
+  document.getElementById('saisie').style.display = 'none';
+
+  const memeContinent = PAYS.filter(p => p.continent === bonPays.continent && p.code !== bonPays.code);
+  let leurres = melange(memeContinent).slice(0, 3);
+  if(leurres.length < 3){
+    const autres = melange(PAYS.filter(p => p.code !== bonPays.code && !leurres.includes(p)));
+    leurres = leurres.concat(autres).slice(0, 3);
+  }
+  const choix = melange([bonPays, ...leurres]);
+
+  const box = document.getElementById('answers');
+  box.innerHTML = '';
+  choix.forEach(pays => {
+    const b = document.createElement('button');
+    b.className = 'ans';
+    b.textContent = pays.nom;
+    b.onclick = () => repondreQCM(b, pays, bonPays);
+    box.appendChild(b);
+  });
+}
+function repondreQCM(bouton, choisi, bonPays){
+  if(repondu) return;
+  repondu = true;
+  document.querySelectorAll('.ans').forEach(b => {
+    b.disabled = true;
+    if(b.textContent === bonPays.nom) b.classList.add('correct');
+  });
+  if(choisi.code === bonPays.code){
+    score++; document.getElementById('scoreVal').textContent = score;
+  } else {
+    bouton.classList.add('wrong');
+  }
+  montrerSuivant();
+}
+
+/* ---- mode SAISIE ---- */
+function poserSaisie(bonPays){
+  document.getElementById('answers').style.display = 'none';
+  document.getElementById('saisie').style.display = 'block';
+
+  const input = document.getElementById('saisieInput');
+  const verdict = document.getElementById('verdict');
+  input.value = '';
+  input.disabled = false;
+  verdict.textContent = '';
+  verdict.className = 'verdict';
+  document.getElementById('validerBtn').disabled = false;
+
+  input.onkeydown = (e) => { if(e.key === 'Enter') validerSaisie(); };
+  input.focus();
+}
+function validerSaisie(){
+  if(repondu) return;
+  const bonPays = partie[index];
+  const input = document.getElementById('saisieInput');
+  const verdict = document.getElementById('verdict');
+  if(input.value.trim() === '') return; // rien tapé : on ne valide pas
+
+  repondu = true;
+  input.disabled = true;
+  document.getElementById('validerBtn').disabled = true;
+
+  if(normaliser(input.value) === normaliser(bonPays.nom)){
+    score++; document.getElementById('scoreVal').textContent = score;
+    verdict.className = 'verdict ok';
+    verdict.textContent = '✓ Correct !';
+  } else {
+    verdict.className = 'verdict ko';
+    verdict.innerHTML = '✗ Raté. C\'était <b>' + bonPays.nom + '</b>.';
+  }
+  montrerSuivant();
+}
+
+/* ---- commun aux deux modes ---- */
+function montrerSuivant(){
+  const btn = document.getElementById('nextBtn');
+  btn.style.display = 'inline-block';
+  btn.focus();
+}
+function nextQuestion(){
+  index++;
+  if(index < partie.length) poserQuestion();
+  else afficherResultat();
+}
+
+function afficherResultat(){
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('finalTotal').textContent = partie.length;
+  const ratio = score / partie.length;
+  let titre, msg;
+  if(ratio === 1){ titre = "Sans-faute&nbsp;! 🌍"; msg = "Un vrai géographe. Chapeau."; }
+  else if(ratio >= .7){ titre = "Beau parcours&nbsp;!"; msg = "Tu maîtrises la carte du monde."; }
+  else if(ratio >= .4){ titre = "Pas mal&nbsp;!"; msg = "Encore quelques tours et ce sera parfait."; }
+  else { titre = "En route&nbsp;!"; msg = "Le monde est vaste, rejoue pour progresser."; }
+  document.getElementById('resultTitle').innerHTML = titre;
+  document.getElementById('resultMsg').textContent = msg;
+  afficherEcran('screen-result');
+}
+
+function goHome(){ afficherEcran('screen-home'); }
+</script>
+</body>
+</html>
