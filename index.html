@@ -90,6 +90,10 @@
 
   /* ===== QUIZ ===== */
   .quiz-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;gap:14px}
+  .quiz-back{font-family:'Inter';font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--line);
+    background:transparent;color:var(--muted);padding:8px 14px;border-radius:9px;flex-shrink:0;
+    display:inline-flex;align-items:center;gap:6px;transition:background .15s,border-color .15s,color .15s}
+  .quiz-back:hover{background:var(--panel-2);border-color:var(--gold);color:var(--text)}
   .score{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px;flex-shrink:0}
   .score b{color:var(--gold);font-size:20px}
   .dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
@@ -227,6 +231,22 @@
     .btn:hover{filter:none}
   }
 
+  /* ====================================================================
+     ★ ORDINATEUR : sur grand écran, le conteneur s'élargit pour
+     mieux occuper l'espace disponible, et les modes de jeu passent
+     en grille à deux colonnes sur l'accueil.
+     ==================================================================== */
+  @media(min-width:900px){
+    .app{max-width:960px;padding:44px 32px 70px}
+    .hero-p{max-width:640px}
+    .modes{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .flag-card{padding:36px}
+    .flag-img{max-width:360px}
+  }
+  @media(min-width:1300px){
+    .app{max-width:1120px}
+  }
+
   @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
   :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 </style>
@@ -312,6 +332,7 @@
   <!-- ============ ÉCRAN 2 : QUIZ ============ -->
   <section class="screen" id="screen-quiz">
     <div class="quiz-head">
+      <button class="quiz-back" onclick="quitQuiz()" aria-label="Revenir au menu">← Menu</button>
       <div class="score">Score <b id="scoreVal">0</b></div>
       <div class="dots" id="dots"></div>
     </div>
@@ -967,6 +988,12 @@ function construireRecap(){
 }
 
 function goHome(){ afficherEcran('screen-home'); }
+
+/* ★ QUITTER : retour au menu en plein milieu d'une partie, avec
+   confirmation pour éviter de perdre sa progression par erreur */
+function quitQuiz(){
+  if(confirm('Quitter la partie en cours et revenir au menu ?')) goHome();
+}
 
 /* ★ CLAVIER : sur ordinateur, les touches 1 à 4 répondent au QCM.
    Sans effet sur téléphone, et ignoré pendant la saisie libre. */
