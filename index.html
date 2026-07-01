@@ -53,15 +53,16 @@
   .hero-h1 em{font-style:normal;color:var(--gold)}
   .hero-p{color:var(--muted);font-size:16px;margin-bottom:26px;max-width:440px}
 
-  /* sélecteur de format (QCM / Saisie) */
-  .format{display:flex;align-items:center;gap:12px;margin-bottom:30px;flex-wrap:wrap}
-  .format .lbl{font-size:13px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+  /* sélecteurs d'options (format, nombre de questions, continent) */
+  .format{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .format .lbl{font-size:13px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;min-width:86px}
   .seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px}
+  .seg.wrap{flex-wrap:wrap}   /* ★ CONTINENT : autorise le retour à la ligne (6 boutons) */
   .seg button{font-family:'Inter';font-size:14px;font-weight:600;cursor:pointer;border:none;background:transparent;
     color:var(--muted);padding:8px 16px;border-radius:7px;transition:background .15s,color .15s}
   .seg button.on{background:var(--gold);color:#241a03}
 
-  .modes{display:flex;flex-direction:column;gap:14px}
+  .modes{display:flex;flex-direction:column;gap:14px;margin-top:16px}
   .mode{display:flex;align-items:center;gap:18px;text-align:left;width:100%;background:var(--panel);
     border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;cursor:pointer;
     transition:border-color .15s,background .15s,transform .15s;font-family:'Inter';color:var(--text)}
@@ -76,13 +77,16 @@
   .mode.soon{opacity:.55;cursor:not-allowed}
 
   /* ===== QUIZ ===== */
-  .quiz-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
-  .score{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px}
+  .quiz-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;gap:14px}
+  .score{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px;flex-shrink:0}
   .score b{color:var(--gold);font-size:20px}
-  .dots{display:flex;gap:6px}
+  .dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
   .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
   .dot.done{background:var(--muted)}
   .dot.now{background:var(--gold);transform:scale(1.25)}
+  /* ★ NB QUESTIONS : au-delà de 20 questions, les points sont remplacés par un compteur texte */
+  .progress-txt{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px;color:var(--muted)}
+  .progress-txt b{color:var(--gold)}
 
   .flag-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:28px;text-align:center;margin-bottom:22px}
   .flag-card .q-label{font-size:13px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px}
@@ -90,8 +94,9 @@
     box-shadow:0 8px 30px rgba(0,0,0,.35);background:var(--panel-2)}
   .flag-img.contour-img{aspect-ratio:1/1;object-fit:contain;padding:14px;filter:invert(1) drop-shadow(0 8px 20px rgba(0,0,0,.45))}
 
-  /* ★ CAPITALES : nom du pays affiché sous le drapeau */
+  /* ★ CAPITALES / INVERSÉ : nom du pays affiché dans la carte de question */
   .pays-nom{font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;margin-top:16px;display:none}
+  .pays-nom.solo{margin-top:4px;font-size:clamp(26px,6vw,34px)}  /* ★ INVERSÉ : sans drapeau, le nom prend toute la place */
 
   /* réponses QCM */
   .answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
@@ -101,6 +106,9 @@
   .ans:disabled{cursor:default}
   .ans.correct{background:rgba(63,182,139,.16);border-color:var(--ok);color:#c7f2e1}
   .ans.wrong{background:rgba(226,96,76,.14);border-color:var(--ko);color:#f6cabf}
+  /* ★ INVERSÉ : boutons de réponse contenant un drapeau au lieu d'un texte */
+  .ans.flag-ans{padding:10px}
+  .ans.flag-ans img{width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:7px;display:block;background:var(--panel-2)}
 
   /* réponse SAISIE */
   .saisie{margin-bottom:20px}
@@ -125,6 +133,17 @@
   .result p{color:var(--muted);margin-bottom:30px}
   .result .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 
+  /* ★ RÉCAP : liste des erreurs avec la correction, sous les boutons */
+  .recap{margin-top:38px;text-align:left}
+  .recap h3{font-family:'Bricolage Grotesque';font-size:15px;margin-bottom:14px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+  .err-item{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);
+    border-radius:11px;padding:12px 14px;margin-bottom:10px}
+  .err-item img{width:66px;aspect-ratio:3/2;object-fit:cover;border-radius:6px;flex-shrink:0;background:var(--panel-2)}
+  .err-item img.contour-mini{aspect-ratio:1/1;object-fit:contain;padding:4px;filter:invert(1)}
+  .err-item .txt b{display:block;font-family:'Bricolage Grotesque';font-size:16px}
+  .err-item .txt small{color:var(--muted);font-size:13.5px}
+  .err-item .txt small span{color:var(--ko)}
+
   @media(max-width:400px){.answers{grid-template-columns:1fr}}
   @media(prefers-reduced-motion:reduce){*{transition:none!important}}
   :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
@@ -145,7 +164,7 @@
   <!-- ============ ÉCRAN 1 : ACCUEIL ============ -->
   <section class="screen active" id="screen-home">
     <h1 class="hero-h1">Reconnais-tu<br>le monde&nbsp;? <em>▸</em></h1>
-    <p class="hero-p">Quatre façons de tester ta géographie. Drapeaux, contours et capitales sont jouables, les hymnes arrivent bientôt.</p>
+    <p class="hero-p">Drapeaux, contours, capitales et mode inversé sont jouables, les hymnes arrivent bientôt.</p>
 
     <div class="format">
       <span class="lbl">Réponses</span>
@@ -155,10 +174,39 @@
       </div>
     </div>
 
+    <!-- ★ NB QUESTIONS : longueur de la partie -->
+    <div class="format">
+      <span class="lbl">Questions</span>
+      <div class="seg" id="segNb">
+        <button class="on" data-nb="10" onclick="choisirNb(10)">10</button>
+        <button data-nb="20" onclick="choisirNb(20)">20</button>
+        <button data-nb="50" onclick="choisirNb(50)">50</button>
+      </div>
+    </div>
+
+    <!-- ★ CONTINENT : filtre facultatif, « Monde » par défaut -->
+    <div class="format">
+      <span class="lbl">Continent</span>
+      <div class="seg wrap" id="segContinent">
+        <button class="on" data-cont="monde" onclick="choisirContinent('monde')">🌍 Monde</button>
+        <button data-cont="Europe" onclick="choisirContinent('Europe')">Europe</button>
+        <button data-cont="Asie" onclick="choisirContinent('Asie')">Asie</button>
+        <button data-cont="Afrique" onclick="choisirContinent('Afrique')">Afrique</button>
+        <button data-cont="Amériques" onclick="choisirContinent('Amériques')">Amériques</button>
+        <button data-cont="Océanie" onclick="choisirContinent('Océanie')">Océanie</button>
+      </div>
+    </div>
+
     <div class="modes">
       <button class="mode" onclick="startQuiz('drapeaux')">
         <span class="emoji">🚩</span>
         <span class="m-txt"><b>Drapeaux</b><small>Devine le pays d'après son drapeau</small></span>
+        <span class="badge on">Jouable</span>
+      </button>
+      <!-- ★ INVERSÉ : nouvelle carte de mode (toujours en QCM : on clique sur un drapeau) -->
+      <button class="mode" onclick="startQuiz('inverse')">
+        <span class="emoji">🎯</span>
+        <span class="m-txt"><b>Drapeaux inversés</b><small>Trouve le drapeau du pays nommé (QCM uniquement)</small></span>
         <span class="badge on">Jouable</span>
       </button>
       <button class="mode" onclick="startQuiz('contours')">
@@ -166,7 +214,6 @@
         <span class="m-txt"><b>Contours</b><small>Devine le pays d'après sa forme</small></span>
         <span class="badge on">Jouable</span>
       </button>
-      <!-- ★ CAPITALES : nouvelle carte de mode -->
       <button class="mode" onclick="startQuiz('capitales')">
         <span class="emoji">🏛️</span>
         <span class="m-txt"><b>Capitales</b><small>Trouve la capitale du pays affiché</small></span>
@@ -188,10 +235,8 @@
     </div>
 
     <div class="flag-card">
-      <!-- ★ CAPITALES : le libellé de question a maintenant un id pour pouvoir changer son texte -->
       <div class="q-label" id="qLabel">Quel est ce pays&nbsp;?</div>
       <img class="flag-img" id="flagImg" alt="Drapeau à identifier">
-      <!-- ★ CAPITALES : nom du pays affiché sous le drapeau (masqué dans les autres modes) -->
       <div class="pays-nom" id="paysNom"></div>
     </div>
 
@@ -222,6 +267,8 @@
         <button class="btn" onclick="startQuiz(modeActuel)">Rejouer</button>
         <button class="btn ghost" onclick="goHome()">Menu</button>
       </div>
+      <!-- ★ RÉCAP : les erreurs de la partie, avec la correction -->
+      <div class="recap" id="recap"></div>
     </div>
   </section>
 
@@ -231,9 +278,8 @@
 /* =====================================================================
    1) LES DONNÉES  —  une ligne = un pays. Ajouter un pays = ajouter
    une ligne. "code" = code ISO à 2 lettres, en minuscules.
-   ★ CAPITALES : chaque pays a maintenant un champ "cap" (sa capitale)
-   et parfois "capAlt" : une liste d'autres réponses acceptées en mode
-   Saisie (ex. "La Haye" pour les Pays-Bas, "Beijing" pour Pékin).
+   "cap" = capitale ; "capAlt" (facultatif) = autres réponses acceptées
+   en mode Saisie (ex. "La Haye" pour les Pays-Bas).
    ===================================================================== */
 const PAYS = [
   {code:"fr", nom:"France",          continent:"Europe", cap:"Paris"},
@@ -459,13 +505,16 @@ function contourUrlLocal(code){ return `contours/${code}.svg`; }
 /* =====================================================================
    3) LE MOTEUR DE JEU
    ===================================================================== */
-const NB_QUESTIONS = 10;
+let nbQuestions = 10;        // ★ NB QUESTIONS : choisi sur l'accueil (10/20/50)
+let continentActuel = 'monde'; // ★ CONTINENT : 'monde' = pas de filtre
 let partie = [];
 let index = 0;
 let score = 0;
+let erreurs = [];            // ★ RÉCAP : les questions ratées de la partie en cours
 let format = 'qcm';          // 'qcm' ou 'saisie'
 let repondu = false;         // évite de valider deux fois la même question
-let modeActuel = 'drapeaux'; // 'drapeaux', 'contours' ou 'capitales'  ★
+let modeActuel = 'drapeaux'; // 'drapeaux', 'inverse', 'contours' ou 'capitales'
+let dotsEnTexte = false;     // ★ NB QUESTIONS : au-delà de 20, compteur texte au lieu des points
 
 // mélange un tableau
 function melange(tab){
@@ -484,11 +533,8 @@ function normaliser(s){
     .replace(/[^a-z0-9]/g,'');                        // enlève espaces, tirets, apostrophes
 }
 
-/* ★ CAPITALES : deux petites fonctions utilitaires.
-   - libelleReponse : le texte à afficher/attendre selon le mode
-     (nom du pays pour Drapeaux/Contours, capitale pour Capitales)
-   - bonneSaisie : vérifie la saisie, en acceptant aussi les
-     variantes listées dans capAlt (ex. "La Haye", "Beijing"…) */
+/* Le texte attendu/affiché selon le mode :
+   capitale en mode Capitales, nom du pays partout ailleurs */
 function libelleReponse(pays){
   return modeActuel === 'capitales' ? pays.cap : pays.nom;
 }
@@ -501,10 +547,25 @@ function bonneSaisie(valeur, bonPays){
   return false;
 }
 
+/* ---- réglages de l'accueil ---- */
 function choisirFormat(f){
   format = f;
   document.querySelectorAll('#segFormat button').forEach(b => {
     b.classList.toggle('on', b.dataset.format === f);
+  });
+}
+/* ★ NB QUESTIONS */
+function choisirNb(n){
+  nbQuestions = n;
+  document.querySelectorAll('#segNb button').forEach(b => {
+    b.classList.toggle('on', +b.dataset.nb === n);
+  });
+}
+/* ★ CONTINENT */
+function choisirContinent(c){
+  continentActuel = c;
+  document.querySelectorAll('#segContinent button').forEach(b => {
+    b.classList.toggle('on', b.dataset.cont === c);
   });
 }
 
@@ -516,10 +577,16 @@ function afficherEcran(id){
 
 function startQuiz(mode){
   modeActuel = mode;
-  // Capitales utilise tous les pays (le drapeau a un secours en ligne)
-  const pool = mode === 'contours' ? PAYS_CONTOURS : PAYS;
-  partie = melange(pool).slice(0, NB_QUESTIONS);
+  // pool de base selon le mode (le mode inversé pioche dans tous les pays,
+  // comme Drapeaux et Capitales, grâce au secours en ligne des drapeaux)
+  let pool = mode === 'contours' ? PAYS_CONTOURS : PAYS;
+  // ★ CONTINENT : filtre facultatif
+  if(continentActuel !== 'monde') pool = pool.filter(p => p.continent === continentActuel);
+  // ★ NB QUESTIONS : si le pool est plus petit que demandé (ex. Océanie en 50
+  // questions), la partie fait simplement la taille du pool
+  partie = melange(pool).slice(0, nbQuestions);
   index = 0; score = 0;
+  erreurs = [];   // ★ RÉCAP
   document.getElementById('scoreVal').textContent = 0;
   construireDots();
   afficherEcran('screen-quiz');
@@ -529,11 +596,22 @@ function startQuiz(mode){
 function construireDots(){
   const box = document.getElementById('dots');
   box.innerHTML = '';
+  dotsEnTexte = partie.length > 20;   // ★ NB QUESTIONS
+  if(dotsEnTexte){
+    const s = document.createElement('span');
+    s.className = 'progress-txt'; s.id = 'progressTxt';
+    box.appendChild(s);
+    return;
+  }
   for(let i = 0; i < partie.length; i++){
     const d = document.createElement('span'); d.className = 'dot'; box.appendChild(d);
   }
 }
 function majDots(){
+  if(dotsEnTexte){   // ★ NB QUESTIONS : compteur "7 / 50"
+    document.getElementById('progressTxt').innerHTML = '<b>' + (index + 1) + '</b> / ' + partie.length;
+    return;
+  }
   document.querySelectorAll('.dot').forEach((d, i) => {
     d.className = 'dot' + (i < index ? ' done' : i === index ? ' now' : '');
   });
@@ -545,9 +623,11 @@ function poserQuestion(){
   majDots();
 
   const img = document.getElementById('flagImg');
-  const label = document.getElementById('qLabel');      // ★
-  const nomEl = document.getElementById('paysNom');     // ★
+  const label = document.getElementById('qLabel');
+  const nomEl = document.getElementById('paysNom');
   img.classList.toggle('contour-img', modeActuel === 'contours');
+  img.style.display = 'block';
+  nomEl.classList.remove('solo');
 
   if(modeActuel === 'contours'){
     label.textContent = 'Quel est ce pays ?';
@@ -557,14 +637,21 @@ function poserQuestion(){
     img.src = contourUrlLocal(bonPays.code);
 
   } else if(modeActuel === 'capitales'){
-    /* ★ CAPITALES : on montre le drapeau ET le nom du pays,
-       la question porte sur la capitale */
     label.textContent = 'Quelle est la capitale de ce pays ?';
     nomEl.style.display = 'block';
     nomEl.textContent = bonPays.nom;
     img.onerror = () => { img.onerror = null; img.src = flagUrlSecours(bonPays.code); };
     img.alt = 'Drapeau : ' + bonPays.nom;
     img.src = flagUrlLocal(bonPays.code);
+
+  } else if(modeActuel === 'inverse'){
+    /* ★ INVERSÉ : pas d'image dans la carte, juste le nom du pays.
+       Les drapeaux sont dans les boutons de réponse. */
+    label.textContent = 'Quel est le drapeau de ce pays ?';
+    img.style.display = 'none';
+    nomEl.style.display = 'block';
+    nomEl.classList.add('solo');
+    nomEl.textContent = bonPays.nom;
 
   } else {
     label.textContent = 'Quel est ce pays ?';
@@ -576,11 +663,14 @@ function poserQuestion(){
 
   document.getElementById('nextBtn').style.display = 'none';
 
-  if(format === 'qcm') poserQCM(bonPays);
+  /* ★ INVERSÉ : ce mode est toujours en QCM (on clique sur un drapeau),
+     quel que soit le format choisi à l'accueil */
+  if(modeActuel === 'inverse') poserQCM(bonPays);
+  else if(format === 'qcm') poserQCM(bonPays);
   else poserSaisie(bonPays);
 }
 
-/* ---- mode QCM ---- */
+/* ---- mode QCM (textes OU drapeaux selon le mode) ---- */
 function poserQCM(bonPays){
   document.getElementById('answers').style.display = 'grid';
   document.getElementById('saisie').style.display = 'none';
@@ -597,9 +687,19 @@ function poserQCM(bonPays){
   box.innerHTML = '';
   choix.forEach(pays => {
     const b = document.createElement('button');
-    b.className = 'ans';
-    b.textContent = libelleReponse(pays);   // ★ nom du pays OU sa capitale
-    b.dataset.code = pays.code;             // ★ repère fiable pour retrouver la bonne réponse
+    b.dataset.code = pays.code;   // repère fiable pour retrouver la bonne réponse
+    if(modeActuel === 'inverse'){
+      /* ★ INVERSÉ : le bouton contient un drapeau */
+      b.className = 'ans flag-ans';
+      const im = document.createElement('img');
+      im.alt = 'Drapeau proposé';
+      im.onerror = () => { im.onerror = null; im.src = flagUrlSecours(pays.code); };
+      im.src = flagUrlLocal(pays.code);
+      b.appendChild(im);
+    } else {
+      b.className = 'ans';
+      b.textContent = libelleReponse(pays);   // nom du pays OU sa capitale
+    }
     b.onclick = () => repondreQCM(b, pays, bonPays);
     box.appendChild(b);
   });
@@ -609,12 +709,14 @@ function repondreQCM(bouton, choisi, bonPays){
   repondu = true;
   document.querySelectorAll('.ans').forEach(b => {
     b.disabled = true;
-    if(b.dataset.code === bonPays.code) b.classList.add('correct');  // ★ comparaison par code, plus par texte
+    if(b.dataset.code === bonPays.code) b.classList.add('correct');
   });
   if(choisi.code === bonPays.code){
     score++; document.getElementById('scoreVal').textContent = score;
   } else {
     bouton.classList.add('wrong');
+    /* ★ RÉCAP : on note l'erreur (le pays + ce que le joueur a répondu) */
+    erreurs.push({pays: bonPays, donnee: choisi.nom});
   }
   montrerSuivant();
 }
@@ -628,7 +730,6 @@ function poserSaisie(bonPays){
   const verdict = document.getElementById('verdict');
   input.value = '';
   input.disabled = false;
-  /* ★ CAPITALES : placeholder adapté au mode */
   input.placeholder = modeActuel === 'capitales' ? 'Écris le nom de la capitale…' : 'Écris le nom du pays…';
   verdict.textContent = '';
   verdict.className = 'verdict';
@@ -648,13 +749,15 @@ function validerSaisie(){
   input.disabled = true;
   document.getElementById('validerBtn').disabled = true;
 
-  if(bonneSaisie(input.value, bonPays)){   // ★ gère nom OU capitale (+ variantes)
+  if(bonneSaisie(input.value, bonPays)){
     score++; document.getElementById('scoreVal').textContent = score;
     verdict.className = 'verdict ok';
     verdict.textContent = '✓ Correct !';
   } else {
     verdict.className = 'verdict ko';
     verdict.innerHTML = '✗ Raté. C\'était <b>' + libelleReponse(bonPays) + '</b>.';
+    /* ★ RÉCAP : on note l'erreur avec la saisie du joueur */
+    erreurs.push({pays: bonPays, donnee: input.value.trim()});
   }
   montrerSuivant();
 }
@@ -682,7 +785,55 @@ function afficherResultat(){
   else { titre = "En route&nbsp;!"; msg = "Le monde est vaste, rejoue pour progresser."; }
   document.getElementById('resultTitle').innerHTML = titre;
   document.getElementById('resultMsg').textContent = msg;
+  construireRecap();   // ★ RÉCAP
   afficherEcran('screen-result');
+}
+
+/* ★ RÉCAP : construit la liste des erreurs avec la correction.
+   Chaque ligne : vignette (drapeau ou contour) + bonne réponse
+   + ce que le joueur avait répondu. Rien ne s'affiche en cas
+   de sans-faute. */
+function construireRecap(){
+  const box = document.getElementById('recap');
+  box.innerHTML = '';
+  if(erreurs.length === 0) return;
+
+  const h = document.createElement('h3');
+  h.textContent = 'À retenir (' + erreurs.length + ')';
+  box.appendChild(h);
+
+  erreurs.forEach(e => {
+    const item = document.createElement('div');
+    item.className = 'err-item';
+
+    // vignette : contour en mode Contours, drapeau partout ailleurs
+    const im = document.createElement('img');
+    if(modeActuel === 'contours'){
+      im.className = 'contour-mini';
+      im.src = contourUrlLocal(e.pays.code);
+    } else {
+      im.onerror = () => { im.onerror = null; im.src = flagUrlSecours(e.pays.code); };
+      im.src = flagUrlLocal(e.pays.code);
+    }
+    im.alt = 'Drapeau : ' + e.pays.nom;
+
+    // texte : bonne réponse en gras, réponse donnée en dessous
+    const txt = document.createElement('div');
+    txt.className = 'txt';
+    const bonne = document.createElement('b');
+    bonne.textContent = modeActuel === 'capitales'
+      ? e.pays.nom + ' → ' + e.pays.cap
+      : e.pays.nom;
+    const detail = document.createElement('small');
+    detail.innerHTML = 'Ta réponse : <span></span>';
+    detail.querySelector('span').textContent = e.donnee;
+    txt.appendChild(bonne);
+    txt.appendChild(detail);
+
+    item.appendChild(im);
+    item.appendChild(txt);
+    box.appendChild(item);
+  });
 }
 
 function goHome(){ afficherEcran('screen-home'); }
