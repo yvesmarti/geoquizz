@@ -204,6 +204,11 @@
     "nom": "Escudo cap-verdien",
     "symbole": "Esc"
   },
+  "ck": {
+    "code": "NZD",
+    "nom": "Dollar néo-zélandais",
+    "symbole": "$"
+  },
   "cy": {
     "code": "EUR",
     "nom": "Euro",
@@ -662,6 +667,11 @@
   "nr": {
     "code": "AUD",
     "nom": "Dollar australien",
+    "symbole": "$"
+  },
+  "nu": {
+    "code": "NZD",
+    "nom": "Dollar néo-zélandais",
     "symbole": "$"
   },
   "nz": {
