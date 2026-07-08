@@ -6,8 +6,39 @@
 <title>Atlas — Quiz géographique</title>
 <!-- ★ MOBILE : description pour Google, couleur de la barre du navigateur
      sur téléphone, et favicon (l'icône dans l'onglet) en SVG intégré -->
-<meta name="description" content="Atlas : quiz géographique gratuit. Drapeaux, contours, capitales… Teste tes connaissances du monde en QCM ou en saisie libre.">
+<meta name="description" content="Atlas : quiz géographique gratuit. Drapeaux, contours, capitales, monnaies… Teste tes connaissances du monde en QCM ou en saisie libre.">
 <meta name="theme-color" content="#0f1a2b">
+<!-- ★ SEO : adresse officielle de la page + aperçus riches quand on
+     partage le lien (réseaux sociaux, messageries) -->
+<link rel="canonical" href="https://yvesmarti.github.io/geoquizz/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Atlas">
+<meta property="og:title" content="Atlas — Quiz géographique">
+<meta property="og:description" content="Quiz géographique gratuit : drapeaux, contours, capitales, monnaies. Teste tes connaissances du monde en QCM ou en saisie libre.">
+<meta property="og:url" content="https://yvesmarti.github.io/geoquizz/">
+<meta property="og:image" content="https://yvesmarti.github.io/geoquizz/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Atlas — Quiz géographique">
+<meta name="twitter:description" content="Quiz géographique gratuit : drapeaux, contours, capitales, monnaies. Teste tes connaissances du monde.">
+<meta name="twitter:image" content="https://yvesmarti.github.io/geoquizz/og-image.png">
+<!-- ★ SEO : fiche d'identité du site pour Google (données structurées) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Atlas — Quiz géographique",
+  "url": "https://yvesmarti.github.io/geoquizz/",
+  "description": "Quiz géographique gratuit : drapeaux, contours, capitales, monnaies. QCM ou saisie libre, filtre par continent, mode chrono et révision des erreurs.",
+  "inLanguage": "fr",
+  "applicationCategory": "GameApplication",
+  "genre": "Éducation",
+  "operatingSystem": "Web",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" }
+}
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='18' fill='%230f1a2b'/%3E%3Cpath d='M20 3 L23 20 L20 37 L17 20 Z' fill='%23e6b74d'/%3E%3Cpath d='M3 20 L20 17 L37 20 L20 23 Z' fill='%23e6b74d' opacity='.55'/%3E%3C/svg%3E">
 <!-- ★ ÉCRAN D'ACCUEIL : le "manifest" décrit le site comme une appli
      (nom, icône, couleurs). Une fois ajouté à l'écran d'accueil du
@@ -74,6 +105,9 @@
     color:var(--muted);padding:8px 16px;border-radius:7px;transition:background .15s,color .15s}
   .seg button.on{background:var(--gold);color:#241a03}
 
+  /* ★ SEO : texte descriptif discret en bas de l'accueil */
+  .site-foot{margin-top:36px;font-size:13px;color:var(--muted);line-height:1.6;max-width:560px}
+
   .modes{display:flex;flex-direction:column;gap:14px;margin-top:16px}
   .mode{display:flex;align-items:center;gap:18px;text-align:left;width:100%;background:var(--panel);
     border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;cursor:pointer;
@@ -96,6 +130,19 @@
   .quiz-back:hover{background:var(--panel-2);border-color:var(--gold);color:var(--text)}
   .score{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px;flex-shrink:0}
   .score b{color:var(--gold);font-size:20px}
+  /* ★ STREAK : badge « 🔥 n » visible à partir de 3 bonnes réponses d'affilée */
+  .streak{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px;flex-shrink:0;
+    background:rgba(230,183,77,.12);border:1px solid rgba(230,183,77,.35);
+    color:var(--gold);padding:3px 10px;border-radius:20px}
+  .streak b{display:inline-block}
+  .streak b.bump{animation:pop .4s ease}
+  /* ★ CHRONO : barre de temps qui se vide au fil de la question.
+     La largeur est pilotée en JavaScript (requestAnimationFrame), donc
+     elle fonctionne aussi quand les animations CSS sont désactivées. */
+  .chrono-bar{height:6px;background:var(--panel);border:1px solid var(--line);
+    border-radius:4px;margin:-10px 0 18px;overflow:hidden}
+  .chrono-fill{height:100%;width:100%;background:var(--gold);border-radius:4px}
+  .chrono-fill.urgent{background:var(--ko)}
   .dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
   .dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
   .dot.done{background:var(--muted)}
@@ -266,7 +313,7 @@
   <!-- ============ ÉCRAN 1 : ACCUEIL ============ -->
   <section class="screen active" id="screen-home">
     <h1 class="hero-h1">Reconnais-tu<br>le monde&nbsp;? <em>▸</em></h1>
-    <p class="hero-p">Drapeaux, contours, capitales, monnaies et mode inversé sont jouables, les hymnes arrivent bientôt.</p>
+    <p class="hero-p">Drapeaux, contours, capitales, monnaies, mode inversé… et un mode révision pour retenir ce que tu rates.</p>
 
     <div class="format">
       <span class="lbl">Réponses</span>
@@ -299,6 +346,16 @@
       </div>
     </div>
 
+    <!-- ★ CHRONO : temps limité (facultatif) pour répondre à chaque question -->
+    <div class="format">
+      <span class="lbl">Chrono</span>
+      <div class="seg" id="segChrono">
+        <button class="on" data-chrono="0" onclick="choisirChrono(0)">Sans</button>
+        <button data-chrono="10" onclick="choisirChrono(10)">10 s</button>
+        <button data-chrono="5" onclick="choisirChrono(5)">5 s</button>
+      </div>
+    </div>
+
     <div class="modes">
       <button class="mode" onclick="startQuiz('drapeaux')">
         <span class="emoji">🚩</span>
@@ -326,12 +383,21 @@
         <span class="m-txt"><b>Monnaies</b><small>Trouve la monnaie utilisée par le pays affiché</small></span>
         <span class="badge on">Jouable</span>
       </button>
-      <button class="mode soon" disabled>
-        <span class="emoji">🎵</span>
-        <span class="m-txt"><b>Hymnes</b><small>Devine le pays d'après son hymne</small></span>
-        <span class="badge off">Bientôt</span>
+      <!-- ★ RÉVISION : rejoue les questions ratées, mémorisées dans le
+           navigateur (banque d'erreurs). Désactivée tant que la banque est vide. -->
+      <button class="mode soon" id="modeRevision" disabled onclick="startQuiz('revision')">
+        <span class="emoji">📚</span>
+        <span class="m-txt"><b>Révision</b><small>Rejoue les questions que tu as ratées</small></span>
+        <span class="badge off" id="revisionBadge">Vide</span>
       </button>
     </div>
+
+    <!-- ★ SEO : court texte descriptif, lisible par les moteurs de recherche -->
+    <footer class="site-foot">
+      <p>Atlas est un quiz de géographie gratuit et sans inscription : reconnais les drapeaux
+      du monde, les contours des pays, les capitales et les monnaies de plus de 195 pays.
+      Joue en QCM ou en saisie libre, filtre par continent, active le chrono et bats tes records.</p>
+    </footer>
   </section>
 
   <!-- ============ ÉCRAN 2 : QUIZ ============ -->
@@ -339,7 +405,14 @@
     <div class="quiz-head">
       <button class="quiz-back" onclick="quitQuiz()" aria-label="Revenir au menu">← Menu</button>
       <div class="score">Score <b id="scoreVal">0</b></div>
+      <!-- ★ STREAK : série de bonnes réponses en cours (dès 3 d'affilée) -->
+      <div class="streak" id="streakBadge" style="display:none">🔥 <b id="streakVal">0</b></div>
       <div class="dots" id="dots"></div>
+    </div>
+
+    <!-- ★ CHRONO : barre de temps (affichée seulement si le chrono est actif) -->
+    <div class="chrono-bar" id="chronoBar" style="display:none">
+      <div class="chrono-fill" id="chronoFill"></div>
     </div>
 
     <div class="flag-card">
@@ -373,8 +446,12 @@
       <p id="resultMsg"></p>
       <!-- ★ RECORD : meilleur score enregistré dans le navigateur -->
       <p id="recordMsg" style="margin-top:-18px;font-size:14px"></p>
+      <!-- ★ STREAK : meilleure série de la partie -->
+      <p id="streakMsg" style="margin-top:-18px;font-size:14px"></p>
       <div class="btns">
         <button class="btn" onclick="startQuiz(modeActuel)">Rejouer</button>
+        <!-- ★ RÉVISION : relance immédiatement les questions ratées de cette partie -->
+        <button class="btn ghost" id="btnRejouerErreurs" style="display:none" onclick="rejouerErreurs()">Rejouer mes erreurs</button>
         <button class="btn ghost" onclick="goHome()">Menu</button>
       </div>
       <!-- ★ RÉCAP : les erreurs de la partie, avec la correction -->
@@ -822,14 +899,30 @@ function contourUrlLocal(code){ return `contours/${code}.svg`; }
    ===================================================================== */
 let nbQuestions = 10;        // ★ NB QUESTIONS : choisi sur l'accueil (10/20/50)
 let continentActuel = 'monde'; // ★ CONTINENT : 'monde' = pas de filtre
-let partie = [];
+let partie = [];             // la partie en cours : liste de {pays, mode}
 let index = 0;
 let score = 0;
 let erreurs = [];            // ★ RÉCAP : les questions ratées de la partie en cours
 let format = 'qcm';          // 'qcm' ou 'saisie'
 let repondu = false;         // évite de valider deux fois la même question
-let modeActuel = 'drapeaux'; // 'drapeaux', 'inverse', 'contours', 'capitales' ou 'monnaies'
+let modeActuel = 'drapeaux'; // mode de la PARTIE : un des modes ci-dessous, ou 'revision'
+let modeQuestion = 'drapeaux'; // ★ RÉVISION : mode de la QUESTION en cours (en révision,
+                               // chaque question garde le mode où l'erreur a été faite)
 let dotsEnTexte = false;     // ★ NB QUESTIONS : au-delà de 20, compteur texte au lieu des points
+let chronoActuel = 0;        // ★ CHRONO : secondes par question (0 = pas de chrono)
+let chronoRAF = null;        // ★ CHRONO : animation en cours (requestAnimationFrame)
+let chronoFinA = 0;          // ★ CHRONO : instant où le temps sera écoulé
+let streak = 0;              // ★ STREAK : bonnes réponses d'affilée en cours
+let meilleureStreak = 0;     // ★ STREAK : meilleure série de la partie
+
+/* ★ SEO : liste des modes accessibles par l'adresse (…/#capitales) et
+   titre d'onglet propre à chacun (mis à jour quand on lance une partie) */
+const MODES_VALIDES = ['drapeaux','inverse','contours','capitales','monnaies','revision'];
+const TITRES_MODES = {
+  drapeaux:'Quiz Drapeaux', inverse:'Quiz Drapeaux inversés', contours:'Quiz Contours',
+  capitales:'Quiz Capitales', monnaies:'Quiz Monnaies', revision:'Révision'
+};
+const TITRE_DEFAUT = document.title;
 
 // mélange un tableau
 function melange(tab){
@@ -848,18 +941,56 @@ function normaliser(s){
     .replace(/[^a-z0-9]/g,'');                        // enlève espaces, tirets, apostrophes
 }
 
-/* Le texte attendu/affiché selon le mode :
+/* Le texte attendu/affiché selon le mode de la question :
    capitale en mode Capitales, nom du pays partout ailleurs */
 function libelleReponse(pays){
-  return modeActuel === 'capitales' ? pays.cap : pays.nom;
+  return modeQuestion === 'capitales' ? pays.cap : pays.nom;
 }
 function bonneSaisie(valeur, bonPays){
   const v = normaliser(valeur);
   if(v === normaliser(libelleReponse(bonPays))) return true;
-  if(modeActuel === 'capitales' && bonPays.capAlt){
+  if(modeQuestion === 'capitales' && bonPays.capAlt){
     return bonPays.capAlt.some(alt => v === normaliser(alt));
   }
   return false;
+}
+
+/* =====================================================================
+   ★ RÉVISION : la « banque d'erreurs » retient (dans le navigateur)
+   les questions ratées : {mode, code pays}. Une bonne réponse en mode
+   Révision retire l'entrée. Plafonnée à 100 entrées (plus ancien évincé).
+   ===================================================================== */
+const CLE_BANQUE = 'atlas-banque-erreurs';
+function lireBanque(){
+  try{ return JSON.parse(localStorage.getItem(CLE_BANQUE)) || []; }
+  catch(e){ return []; }
+}
+function ecrireBanque(banque){
+  localStorage.setItem(CLE_BANQUE, JSON.stringify(banque));
+}
+function ajouterBanque(mode, code){
+  const banque = lireBanque().filter(e => !(e.mode === mode && e.code === code));
+  banque.push({mode, code});
+  while(banque.length > 100) banque.shift();
+  ecrireBanque(banque);
+}
+function retirerBanque(mode, code){
+  ecrireBanque(lireBanque().filter(e => !(e.mode === mode && e.code === code)));
+}
+/* active/désactive la carte Révision de l'accueil selon la banque */
+function majCarteRevision(){
+  const carte = document.getElementById('modeRevision');
+  const badge = document.getElementById('revisionBadge');
+  const n = lireBanque().length;
+  carte.disabled = n === 0;
+  carte.classList.toggle('soon', n === 0);
+  badge.className = 'badge ' + (n === 0 ? 'off' : 'on');
+  badge.textContent = n === 0 ? 'Vide' : n + ' à revoir';
+}
+/* note une erreur : récap de la partie + banque de révision */
+function noterErreur(bonPays, donnee){
+  erreurs.push({pays: bonPays, mode: modeQuestion, donnee});
+  ajouterBanque(modeQuestion, bonPays.code);
 }
 
 /* ---- réglages de l'accueil ---- */
@@ -883,6 +1014,13 @@ function choisirContinent(c){
     b.classList.toggle('on', b.dataset.cont === c);
   });
 }
+/* ★ CHRONO */
+function choisirChrono(s){
+  chronoActuel = s;
+  document.querySelectorAll('#segChrono button').forEach(b => {
+    b.classList.toggle('on', +b.dataset.chrono === s);
+  });
+}
 
 function afficherEcran(id){
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -891,7 +1029,17 @@ function afficherEcran(id){
 }
 
 function startQuiz(mode){
-  modeActuel = mode;
+  /* ★ RÉVISION : la partie est tirée de la banque d'erreurs ; chaque
+     question sera posée dans le mode où l'erreur avait été faite */
+  if(mode === 'revision'){
+    const banque = lireBanque();
+    if(banque.length === 0){ goHome(); return; }
+    const entrees = melange(banque).slice(0, nbQuestions)
+      .map(e => ({pays: PAYS.find(p => p.code === e.code), mode: e.mode}))
+      .filter(e => e.pays);
+    lancerPartie(entrees, 'revision');
+    return;
+  }
   // pool de base selon le mode (le mode inversé pioche dans tous les pays,
   // comme Drapeaux et Capitales, grâce au secours en ligne des drapeaux)
   let pool = mode === 'contours' ? PAYS_CONTOURS : PAYS;
@@ -899,11 +1047,29 @@ function startQuiz(mode){
   if(continentActuel !== 'monde') pool = pool.filter(p => p.continent === continentActuel);
   // ★ NB QUESTIONS : si le pool est plus petit que demandé (ex. Océanie en 50
   // questions), la partie fait simplement la taille du pool
-  partie = melange(pool).slice(0, nbQuestions);
+  lancerPartie(melange(pool).slice(0, nbQuestions).map(p => ({pays: p, mode})), mode);
+}
+
+/* ★ RÉVISION (résultat) : relance uniquement les questions ratées de la
+   partie qui vient de se terminer, chacune dans son mode d'origine */
+function rejouerErreurs(){
+  if(erreurs.length === 0) return;
+  lancerPartie(melange(erreurs.map(e => ({pays: e.pays, mode: e.mode}))), 'revision');
+}
+
+/* démarre une partie déjà construite (liste de {pays, mode}) */
+function lancerPartie(entrees, modeJeu){
+  modeActuel = modeJeu;
+  partie = entrees;
   index = 0; score = 0;
-  erreurs = [];   // ★ RÉCAP
+  erreurs = [];              // ★ RÉCAP
+  streak = 0; meilleureStreak = 0;   // ★ STREAK
+  majStreakBadge(false);
   document.getElementById('scoreVal').textContent = 0;
   construireDots();
+  /* ★ SEO : adresse partageable (…/#capitales) + titre d'onglet du mode */
+  if(location.hash !== '#' + modeJeu) location.hash = modeJeu;
+  document.title = TITRES_MODES[modeJeu] + ' — Atlas';
   afficherEcran('screen-quiz');
   poserQuestion();
 }
@@ -933,25 +1099,28 @@ function majDots(){
 }
 
 function poserQuestion(){
-  const bonPays = partie[index];
+  const bonPays = partie[index].pays;
+  /* ★ RÉVISION : le mode de la question (identique au mode de la partie,
+     sauf en révision où chaque question garde son mode d'origine) */
+  modeQuestion = partie[index].mode;
   repondu = false;
   majDots();
 
   const img = document.getElementById('flagImg');
   const label = document.getElementById('qLabel');
   const nomEl = document.getElementById('paysNom');
-  img.classList.toggle('contour-img', modeActuel === 'contours');
+  img.classList.toggle('contour-img', modeQuestion === 'contours');
   img.style.display = 'block';
   nomEl.classList.remove('solo');
 
-  if(modeActuel === 'contours'){
+  if(modeQuestion === 'contours'){
     label.textContent = 'Quel est ce pays ?';
     nomEl.style.display = 'none';
     img.onerror = null;
     img.alt = 'Silhouette du pays à identifier';
     img.src = contourUrlLocal(bonPays.code);
 
-  } else if(modeActuel === 'capitales'){
+  } else if(modeQuestion === 'capitales'){
     label.textContent = 'Quelle est la capitale de ce pays ?';
     nomEl.style.display = 'block';
     nomEl.textContent = bonPays.nom;
@@ -959,7 +1128,7 @@ function poserQuestion(){
     img.alt = 'Drapeau : ' + bonPays.nom;
     img.src = flagUrlLocal(bonPays.code);
 
-  } else if(modeActuel === 'monnaies'){
+  } else if(modeQuestion === 'monnaies'){
     /* ★ MONNAIES : même présentation que Capitales (drapeau + nom du pays) */
     label.textContent = 'Quelle est la monnaie de ce pays ?';
     nomEl.style.display = 'block';
@@ -968,7 +1137,7 @@ function poserQuestion(){
     img.alt = 'Drapeau : ' + bonPays.nom;
     img.src = flagUrlLocal(bonPays.code);
 
-  } else if(modeActuel === 'inverse'){
+  } else if(modeQuestion === 'inverse'){
     /* ★ INVERSÉ : pas d'image dans la carte, juste le nom du pays.
        Les drapeaux sont dans les boutons de réponse. */
     label.textContent = 'Quel est le drapeau de ce pays ?';
@@ -993,20 +1162,22 @@ function poserQuestion(){
   const suivant = partie[index + 1];
   if(suivant){
     const pre = new Image();
-    if(modeActuel === 'contours'){
-      pre.src = contourUrlLocal(suivant.code);
+    if(suivant.mode === 'contours'){
+      pre.src = contourUrlLocal(suivant.pays.code);
     } else {
-      pre.onerror = () => { pre.onerror = null; pre.src = flagUrlSecours(suivant.code); };
-      pre.src = flagUrlLocal(suivant.code);
+      pre.onerror = () => { pre.onerror = null; pre.src = flagUrlSecours(suivant.pays.code); };
+      pre.src = flagUrlLocal(suivant.pays.code);
     }
   }
 
   /* ★ INVERSÉ / MONNAIES : ces modes sont toujours en QCM (drapeau à
      cliquer, ou noms de monnaie partagés entre pays), quel que soit le
      format choisi à l'accueil */
-  if(modeActuel === 'inverse' || modeActuel === 'monnaies') poserQCM(bonPays);
+  if(modeQuestion === 'inverse' || modeQuestion === 'monnaies') poserQCM(bonPays);
   else if(format === 'qcm') poserQCM(bonPays);
   else poserSaisie(bonPays);
+
+  demarrerChrono();   // ★ CHRONO : sans effet si le chrono est désactivé
 }
 
 /* ★ MONNAIES : tire 3 monnaies différentes de celle de bonPays, dédoublonnées
@@ -1036,7 +1207,7 @@ function poserQCM(bonPays){
   document.getElementById('answers').style.display = 'grid';
   document.getElementById('saisie').style.display = 'none';
 
-  if(modeActuel === 'monnaies'){
+  if(modeQuestion === 'monnaies'){
     /* ★ MONNAIES : boutons de monnaies (pas de pays), validation par code */
     const bonneMonnaie = MONNAIES[bonPays.code];
     const choix = melange([bonneMonnaie, ...leurresMonnaie(bonPays)]);
@@ -1066,7 +1237,7 @@ function poserQCM(bonPays){
   choix.forEach(pays => {
     const b = document.createElement('button');
     b.dataset.code = pays.code;   // repère fiable pour retrouver la bonne réponse
-    if(modeActuel === 'inverse'){
+    if(modeQuestion === 'inverse'){
       /* ★ INVERSÉ : le bouton contient un drapeau */
       b.className = 'ans flag-ans';
       const im = document.createElement('img');
@@ -1085,25 +1256,49 @@ function poserQCM(bonPays){
 /* code attendu pour la bonne réponse : celui du pays, sauf en mode
    Monnaies où on compare des codes de monnaie (ex. "EUR"), pas de pays */
 function codeAttendu(bonPays){
-  return modeActuel === 'monnaies' ? MONNAIES[bonPays.code].code : bonPays.code;
+  return modeQuestion === 'monnaies' ? MONNAIES[bonPays.code].code : bonPays.code;
 }
 function repondreQCM(bouton, choisi, bonPays){
   if(repondu) return;
   repondu = true;
+  stopChrono();   // ★ CHRONO : le temps s'arrête dès qu'on répond
   const bonCode = codeAttendu(bonPays);
   document.querySelectorAll('.ans').forEach(b => {
     b.disabled = true;
     if(b.dataset.code === bonCode) b.classList.add('correct');
   });
   if(choisi.code === bonCode){
-    score++;
-    bumpScore();   // ★ FEEDBACK : petit rebond du compteur de score
+    bonneReponse(bonPays);
   } else {
     bouton.classList.add('wrong');
-    /* ★ RÉCAP : on note l'erreur (le pays + ce que le joueur a répondu) */
-    erreurs.push({pays: bonPays, donnee: choisi.nom});
+    casserStreak();                       // ★ STREAK
+    noterErreur(bonPays, choisi.nom);     // ★ RÉCAP + banque de révision
   }
   montrerSuivant();
+}
+
+/* ★ commun aux deux formats : score, streak, et retrait de la banque
+   d'erreurs quand une question est corrigée en mode Révision */
+function bonneReponse(bonPays){
+  score++;
+  bumpScore();   // ★ FEEDBACK : petit rebond du compteur de score
+  streak++;      // ★ STREAK
+  if(streak > meilleureStreak) meilleureStreak = streak;
+  majStreakBadge(true);
+  if(modeActuel === 'revision') retirerBanque(modeQuestion, bonPays.code);
+}
+/* ★ STREAK : le badge 🔥 apparaît à partir de 3 bonnes réponses d'affilée */
+function casserStreak(){ streak = 0; majStreakBadge(false); }
+function majStreakBadge(rebond){
+  const badge = document.getElementById('streakBadge');
+  const val = document.getElementById('streakVal');
+  badge.style.display = streak >= 3 ? 'block' : 'none';
+  val.textContent = streak;
+  if(rebond && streak >= 3){
+    val.classList.remove('bump');
+    void val.offsetWidth;
+    val.classList.add('bump');
+  }
 }
 
 /* ★ FEEDBACK : met à jour le score avec un rebond. L'astuce
@@ -1137,18 +1332,18 @@ function poserSaisie(bonPays){
 }
 function validerSaisie(){
   if(repondu) return;
-  const bonPays = partie[index];
+  const bonPays = partie[index].pays;
   const input = document.getElementById('saisieInput');
   const verdict = document.getElementById('verdict');
   if(input.value.trim() === '') return; // rien tapé : on ne valide pas
 
   repondu = true;
+  stopChrono();   // ★ CHRONO : le temps s'arrête dès qu'on répond
   input.disabled = true;
   document.getElementById('validerBtn').disabled = true;
 
   if(bonneSaisie(input.value, bonPays)){
-    score++;
-    bumpScore();                        // ★ FEEDBACK : rebond du score
+    bonneReponse(bonPays);              // score + streak (+ révision)
     input.classList.add('correct');     // bordure verte sur le champ
     verdict.className = 'verdict ok';
     verdict.textContent = '✓ Correct !';
@@ -1156,9 +1351,63 @@ function validerSaisie(){
     input.classList.add('wrong');       // ★ FEEDBACK : le champ tremble en rouge
     verdict.className = 'verdict ko';
     verdict.innerHTML = '✗ Raté. C\'était <b>' + libelleReponse(bonPays) + '</b>.';
-    /* ★ RÉCAP : on note l'erreur avec la saisie du joueur */
-    erreurs.push({pays: bonPays, donnee: input.value.trim()});
+    casserStreak();                     // ★ STREAK
+    /* ★ RÉCAP + banque de révision : on note l'erreur avec la saisie du joueur */
+    noterErreur(bonPays, input.value.trim());
   }
+  montrerSuivant();
+}
+
+/* =====================================================================
+   ★ CHRONO : compte à rebours par question. La barre est animée en
+   JavaScript (requestAnimationFrame) : elle reste donc exacte même si
+   les animations CSS sont désactivées (prefers-reduced-motion), et il
+   suffit d'annuler l'animation pour figer la barre quand on répond.
+   ===================================================================== */
+function demarrerChrono(){
+  const bar = document.getElementById('chronoBar');
+  if(!chronoActuel){ bar.style.display = 'none'; return; }
+  const fill = document.getElementById('chronoFill');
+  bar.style.display = 'block';
+  fill.classList.remove('urgent');
+  fill.style.width = '100%';
+  chronoFinA = performance.now() + chronoActuel * 1000;
+  const tick = (maintenant) => {
+    const reste = Math.max(0, chronoFinA - maintenant);
+    fill.style.width = (reste / (chronoActuel * 1000) * 100) + '%';
+    fill.classList.toggle('urgent', reste <= 3000);   // rouge sous 3 s
+    if(reste <= 0){ chronoRAF = null; tempsEcoule(); return; }
+    chronoRAF = requestAnimationFrame(tick);
+  };
+  chronoRAF = requestAnimationFrame(tick);
+}
+function stopChrono(){
+  if(chronoRAF){ cancelAnimationFrame(chronoRAF); chronoRAF = null; }
+}
+/* temps écoulé = mauvaise réponse : on révèle la bonne réponse,
+   on note l'erreur, et on passe à la suite comme d'habitude */
+function tempsEcoule(){
+  if(repondu) return;
+  repondu = true;
+  const bonPays = partie[index].pays;
+  const bonCode = codeAttendu(bonPays);
+  // format QCM : on désactive les boutons et on montre la bonne réponse
+  document.querySelectorAll('.ans').forEach(b => {
+    b.disabled = true;
+    if(b.dataset.code === bonCode) b.classList.add('correct');
+  });
+  // format Saisie : on fige le champ et on affiche la correction
+  const saisieVisible = document.getElementById('saisie').style.display !== 'none';
+  if(saisieVisible){
+    const input = document.getElementById('saisieInput');
+    const verdict = document.getElementById('verdict');
+    input.disabled = true;
+    document.getElementById('validerBtn').disabled = true;
+    verdict.className = 'verdict ko';
+    verdict.innerHTML = '⏱ Temps écoulé ! C\'était <b>' + libelleReponse(bonPays) + '</b>.';
+  }
+  casserStreak();                       // ★ STREAK
+  noterErreur(bonPays, '⏱ temps écoulé');
   montrerSuivant();
 }
 
@@ -1179,7 +1428,14 @@ function afficherResultat(){
   document.getElementById('finalTotal').textContent = partie.length;
   const ratio = score / partie.length;
   let titre, msg;
-  if(ratio === 1){ titre = "Sans-faute&nbsp;! 🌍"; msg = "Un vrai géographe. Chapeau."; }
+  if(modeActuel === 'revision'){
+    /* ★ RÉVISION : pas de record, un message sur les notions corrigées */
+    titre = "Révision terminée&nbsp;! 📚";
+    msg = score === 0 ? "Ces questions reviendront : rejoue-les pour les retenir."
+      : score + (score > 1 ? " notions corrigées" : " notion corrigée")
+        + " — elles sortent de ta pile de révision.";
+  }
+  else if(ratio === 1){ titre = "Sans-faute&nbsp;! 🌍"; msg = "Un vrai géographe. Chapeau."; }
   else if(ratio >= .7){ titre = "Beau parcours&nbsp;!"; msg = "Tu maîtrises la carte du monde."; }
   else if(ratio >= .4){ titre = "Pas mal&nbsp;!"; msg = "Encore quelques tours et ce sera parfait."; }
   else { titre = "En route&nbsp;!"; msg = "Le monde est vaste, rejoue pour progresser."; }
@@ -1187,19 +1443,49 @@ function afficherResultat(){
   document.getElementById('resultMsg').textContent = msg;
 
   /* ★ RECORD : localStorage = petite mémoire du navigateur qui survit
-     à la fermeture de la page. On garde le meilleur pourcentage par mode. */
-  const pct = Math.round(ratio * 100);
-  const cle = 'atlas-record-' + modeActuel;
-  const ancien = +(localStorage.getItem(cle) || 0);
+     à la fermeture de la page. On garde le meilleur pourcentage par mode
+     (records séparés quand le chrono est actif). Pas de record en révision. */
   const recEl = document.getElementById('recordMsg');
-  if(pct > ancien){
-    localStorage.setItem(cle, pct);
-    recEl.textContent = '🏆 Nouveau record : ' + pct + ' % de bonnes réponses !';
-    recEl.style.color = 'var(--gold)';
-  } else {
-    recEl.textContent = 'Ton record dans ce mode : ' + ancien + ' %';
+  if(modeActuel === 'revision'){
+    const reste = lireBanque().length;
+    recEl.textContent = reste === 0 ? '✨ Ta pile de révision est vide, bravo !'
+      : 'Encore ' + reste + ' question' + (reste > 1 ? 's' : '') + ' dans ta pile de révision.';
     recEl.style.color = 'var(--muted)';
+  } else {
+    const pct = Math.round(ratio * 100);
+    const cle = 'atlas-record-' + modeActuel + (chronoActuel ? '-chrono' + chronoActuel : '');
+    const ancien = +(localStorage.getItem(cle) || 0);
+    const suffixe = chronoActuel ? ' (chrono ' + chronoActuel + ' s)' : '';
+    if(pct > ancien){
+      localStorage.setItem(cle, pct);
+      recEl.textContent = '🏆 Nouveau record' + suffixe + ' : ' + pct + ' % de bonnes réponses !';
+      recEl.style.color = 'var(--gold)';
+    } else {
+      recEl.textContent = 'Ton record dans ce mode' + suffixe + ' : ' + ancien + ' %';
+      recEl.style.color = 'var(--muted)';
+    }
   }
+
+  /* ★ STREAK : meilleure série de la partie + record absolu de série */
+  const stEl = document.getElementById('streakMsg');
+  if(meilleureStreak >= 3){
+    const ancienStreak = +(localStorage.getItem('atlas-streak') || 0);
+    if(meilleureStreak > ancienStreak){
+      localStorage.setItem('atlas-streak', meilleureStreak);
+      stEl.textContent = '🔥 Nouveau record de série : ' + meilleureStreak + " bonnes réponses d'affilée !";
+      stEl.style.color = 'var(--gold)';
+    } else {
+      stEl.textContent = '🔥 Meilleure série de la partie : ' + meilleureStreak;
+      stEl.style.color = 'var(--muted)';
+    }
+  } else {
+    stEl.textContent = '';
+  }
+
+  /* ★ RÉVISION : bouton pour rejouer immédiatement les erreurs de la partie */
+  const btnErr = document.getElementById('btnRejouerErreurs');
+  btnErr.style.display = erreurs.length > 0 ? 'inline-block' : 'none';
+  btnErr.textContent = 'Rejouer mes erreurs (' + erreurs.length + ')';
 
   construireRecap();   // ★ RÉCAP
   afficherEcran('screen-result');
@@ -1223,8 +1509,9 @@ function construireRecap(){
     item.className = 'err-item';
 
     // vignette : contour en mode Contours, drapeau partout ailleurs
+    // (chaque erreur garde son propre mode : indispensable en révision)
     const im = document.createElement('img');
-    if(modeActuel === 'contours'){
+    if(e.mode === 'contours'){
       im.className = 'contour-mini';
       im.src = contourUrlLocal(e.pays.code);
     } else {
@@ -1237,8 +1524,8 @@ function construireRecap(){
     const txt = document.createElement('div');
     txt.className = 'txt';
     const bonne = document.createElement('b');
-    bonne.textContent = modeActuel === 'capitales' ? e.pays.nom + ' → ' + e.pays.cap
-      : modeActuel === 'monnaies' ? e.pays.nom + ' → ' + MONNAIES[e.pays.code].nom
+    bonne.textContent = e.mode === 'capitales' ? e.pays.nom + ' → ' + e.pays.cap
+      : e.mode === 'monnaies' ? e.pays.nom + ' → ' + MONNAIES[e.pays.code].nom
       : e.pays.nom;
     const detail = document.createElement('small');
     detail.innerHTML = 'Ta réponse : <span></span>';
@@ -1252,13 +1539,35 @@ function construireRecap(){
   });
 }
 
-function goHome(){ afficherEcran('screen-home'); }
+function goHome(){
+  stopChrono();                 // ★ CHRONO : au cas où une question était en cours
+  majCarteRevision();           // ★ RÉVISION : rafraîchit le compteur de la carte
+  /* ★ SEO : on retire le #mode de l'adresse et on remet le titre d'origine
+     (replaceState = changer l'adresse sans recharger ni créer d'historique) */
+  history.replaceState(null, '', location.pathname + location.search);
+  document.title = TITRE_DEFAUT;
+  afficherEcran('screen-home');
+}
 
 /* ★ QUITTER : retour au menu en plein milieu d'une partie, avec
    confirmation pour éviter de perdre sa progression par erreur */
 function quitQuiz(){
   if(confirm('Quitter la partie en cours et revenir au menu ?')) goHome();
 }
+
+/* ★ SEO : navigation par l'adresse. Ouvrir …/#capitales lance le quiz
+   Capitales ; le bouton Précédent du navigateur ramène au menu. */
+function appliquerHash(){
+  const m = location.hash.slice(1);
+  if(MODES_VALIDES.includes(m)){
+    // ne rien faire si la partie demandée est déjà en cours
+    const quizActif = document.getElementById('screen-quiz').classList.contains('active');
+    if(!(quizActif && modeActuel === m)) startQuiz(m);
+  } else if(!document.getElementById('screen-home').classList.contains('active')){
+    goHome();
+  }
+}
+window.addEventListener('hashchange', appliquerHash);
 
 /* ★ CLAVIER : sur ordinateur, les touches 1 à 4 répondent au QCM.
    Sans effet sur téléphone, et ignoré pendant la saisie libre. */
@@ -1270,6 +1579,12 @@ document.addEventListener('keydown', (e) => {
   const boutons = document.querySelectorAll('#answers .ans');
   if(boutons[n]) boutons[n].click();
 });
+
+/* ---- au chargement ---- */
+majCarteRevision();   // ★ RÉVISION : active la carte si la banque n'est pas vide
+/* ★ SEO : si l'adresse contient déjà un mode (…/#capitales), on lance
+   directement la partie correspondante */
+if(MODES_VALIDES.includes(location.hash.slice(1))) appliquerHash();
 </script>
 <script>
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
