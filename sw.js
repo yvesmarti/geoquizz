@@ -1,15 +1,15 @@
 // ★ SERVICE WORKER — Atlas Quiz géographique
 // Change le numéro de version (v1 → v2, etc.) quand tu veux forcer
 // la mise à jour du cache chez les utilisateurs.
-const CACHE = 'atlas-v2';
+const CACHE = 'atlas-v3';
 
 // Fichiers mis en cache dès l'installation (le strict nécessaire)
 const CORE = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 // Installation : on met en cache les fichiers de base
