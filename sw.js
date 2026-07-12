@@ -1,7 +1,7 @@
 // ★ SERVICE WORKER — Atlas Quiz géographique
 // Change le numéro de version (v1 → v2, etc.) quand tu veux forcer
 // la mise à jour du cache chez les utilisateurs.
-const CACHE = 'atlas-v3';
+const CACHE = 'atlas-v4';
 
 // Fichiers mis en cache dès l'installation (le strict nécessaire)
 const CORE = [
@@ -29,21 +29,35 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Stratégie : réseau d'abord, cache en secours.
-// En plus, tout ce qui est téléchargé (drapeaux, contours…) est
-// automatiquement gardé en cache pour la prochaine fois hors ligne.
+// Stratégie mixte :
+// - drapeaux/ et contours/ ne changent jamais une fois publiés → cache
+//   d'abord (rapide, pas de re-téléchargement inutile à chaque partie),
+//   avec le réseau en secours si l'image n'est pas encore en cache.
+// - le reste (app, manifest…) → réseau d'abord, cache en secours, pour
+//   que les mises à jour du site arrivent sans attendre.
+// Seules les réponses valides (response.ok) sont mises en cache, pour
+// ne jamais figer une erreur réseau (404/5xx) dans le cache hors ligne.
+const ASSETS_IMMUABLES = /\/(drapeaux|contours)\//;
+
 self.addEventListener('fetch', event => {
   // On ne gère que les requêtes GET (pas d'envoi de données)
   if (event.request.method !== 'GET') return;
 
+  const estAssetImmuable = ASSETS_IMMUABLES.test(new URL(event.request.url).pathname);
+
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Copie de la réponse mise en cache au passage
-        const copy = response.clone();
-        caches.open(CACHE).then(cache => cache.put(event.request, copy));
-        return response;
-      })
-      .catch(() => caches.match(event.request)) // hors ligne → cache
+    estAssetImmuable
+      ? caches.match(event.request).then(reponse => reponse || depuisReseau(event.request))
+      : depuisReseau(event.request).catch(() => caches.match(event.request))
   );
 });
+
+function depuisReseau(request){
+  return fetch(request).then(response => {
+    if(response.ok){
+      const copy = response.clone();
+      caches.open(CACHE).then(cache => cache.put(request, copy));
+    }
+    return response;
+  });
+}
