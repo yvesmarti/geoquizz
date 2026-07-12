@@ -316,43 +316,43 @@
     <p class="hero-p">Drapeaux, contours, capitales, monnaies, mode inversé… et un mode révision pour retenir ce que tu rates.</p>
 
     <div class="format">
-      <span class="lbl">Réponses</span>
-      <div class="seg" id="segFormat">
-        <button class="on" data-format="qcm" onclick="choisirFormat('qcm')">QCM à 4 choix</button>
-        <button data-format="saisie" onclick="choisirFormat('saisie')">Saisie libre</button>
+      <span class="lbl" id="lblFormat">Réponses</span>
+      <div class="seg" id="segFormat" role="group" aria-labelledby="lblFormat">
+        <button class="on" aria-pressed="true" data-format="qcm" onclick="choisirFormat('qcm')">QCM à 4 choix</button>
+        <button aria-pressed="false" data-format="saisie" onclick="choisirFormat('saisie')">Saisie libre</button>
       </div>
     </div>
 
     <!-- ★ NB QUESTIONS : longueur de la partie -->
     <div class="format">
-      <span class="lbl">Questions</span>
-      <div class="seg" id="segNb">
-        <button class="on" data-nb="10" onclick="choisirNb(10)">10</button>
-        <button data-nb="20" onclick="choisirNb(20)">20</button>
-        <button data-nb="50" onclick="choisirNb(50)">50</button>
+      <span class="lbl" id="lblNb">Questions</span>
+      <div class="seg" id="segNb" role="group" aria-labelledby="lblNb">
+        <button class="on" aria-pressed="true" data-nb="10" onclick="choisirNb(10)">10</button>
+        <button aria-pressed="false" data-nb="20" onclick="choisirNb(20)">20</button>
+        <button aria-pressed="false" data-nb="50" onclick="choisirNb(50)">50</button>
       </div>
     </div>
 
     <!-- ★ CONTINENT : filtre facultatif, « Monde » par défaut -->
     <div class="format">
-      <span class="lbl">Continent</span>
-      <div class="seg wrap" id="segContinent">
-        <button class="on" data-cont="monde" onclick="choisirContinent('monde')">🌍 Monde</button>
-        <button data-cont="Europe" onclick="choisirContinent('Europe')">Europe</button>
-        <button data-cont="Asie" onclick="choisirContinent('Asie')">Asie</button>
-        <button data-cont="Afrique" onclick="choisirContinent('Afrique')">Afrique</button>
-        <button data-cont="Amériques" onclick="choisirContinent('Amériques')">Amériques</button>
-        <button data-cont="Océanie" onclick="choisirContinent('Océanie')">Océanie</button>
+      <span class="lbl" id="lblContinent">Continent</span>
+      <div class="seg wrap" id="segContinent" role="group" aria-labelledby="lblContinent">
+        <button class="on" aria-pressed="true" data-cont="monde" onclick="choisirContinent('monde')">🌍 Monde</button>
+        <button aria-pressed="false" data-cont="Europe" onclick="choisirContinent('Europe')">Europe</button>
+        <button aria-pressed="false" data-cont="Asie" onclick="choisirContinent('Asie')">Asie</button>
+        <button aria-pressed="false" data-cont="Afrique" onclick="choisirContinent('Afrique')">Afrique</button>
+        <button aria-pressed="false" data-cont="Amériques" onclick="choisirContinent('Amériques')">Amériques</button>
+        <button aria-pressed="false" data-cont="Océanie" onclick="choisirContinent('Océanie')">Océanie</button>
       </div>
     </div>
 
     <!-- ★ CHRONO : temps limité (facultatif) pour répondre à chaque question -->
     <div class="format">
-      <span class="lbl">Chrono</span>
-      <div class="seg" id="segChrono">
-        <button class="on" data-chrono="0" onclick="choisirChrono(0)">Sans</button>
-        <button data-chrono="10" onclick="choisirChrono(10)">10 s</button>
-        <button data-chrono="5" onclick="choisirChrono(5)">5 s</button>
+      <span class="lbl" id="lblChrono">Chrono</span>
+      <div class="seg" id="segChrono" role="group" aria-labelledby="lblChrono">
+        <button class="on" aria-pressed="true" data-chrono="0" onclick="choisirChrono(0)">Sans</button>
+        <button aria-pressed="false" data-chrono="10" onclick="choisirChrono(10)">10 s</button>
+        <button aria-pressed="false" data-chrono="5" onclick="choisirChrono(5)">5 s</button>
       </div>
     </div>
 
@@ -997,28 +997,36 @@ function noterErreur(bonPays, donnee){
 function choisirFormat(f){
   format = f;
   document.querySelectorAll('#segFormat button').forEach(b => {
-    b.classList.toggle('on', b.dataset.format === f);
+    const on = b.dataset.format === f;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on);
   });
 }
 /* ★ NB QUESTIONS */
 function choisirNb(n){
   nbQuestions = n;
   document.querySelectorAll('#segNb button').forEach(b => {
-    b.classList.toggle('on', +b.dataset.nb === n);
+    const on = +b.dataset.nb === n;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on);
   });
 }
 /* ★ CONTINENT */
 function choisirContinent(c){
   continentActuel = c;
   document.querySelectorAll('#segContinent button').forEach(b => {
-    b.classList.toggle('on', b.dataset.cont === c);
+    const on = b.dataset.cont === c;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on);
   });
 }
 /* ★ CHRONO */
 function choisirChrono(s){
   chronoActuel = s;
   document.querySelectorAll('#segChrono button').forEach(b => {
-    b.classList.toggle('on', +b.dataset.chrono === s);
+    const on = +b.dataset.chrono === s;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on);
   });
 }
 
