@@ -1,0 +1,247 @@
+/* ====================================================================
+   TOKENS — toute l'identité visuelle est réglée ici (couleurs, etc.)
+   Thème : « atlas de nuit ». Fond sombre pour faire ressortir les
+   drapeaux, accent doré (boussole), méridiens en filigrane.
+   ==================================================================== */
+:root{
+  --bg:#0f1a2b; --panel:#17253c; --panel-2:#1e304c;
+  --line:rgba(255,255,255,.09);
+  --text:#eaf1f9; --muted:#8ea6c2;
+  --gold:#e6b74d; --ok:#3fb68b; --ko:#e2604c;
+  --radius:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--bg);
+  background-image:
+    linear-gradient(var(--line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:48px 48px;min-height:100vh;min-height:100dvh;line-height:1.55;-webkit-font-smoothing:antialiased;
+  /* ★ MOBILE : 100dvh = hauteur réelle de l'écran sur téléphone,
+     en tenant compte de la barre d'adresse qui apparaît/disparaît */
+}
+.display{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;line-height:1.05}
+
+.app{max-width:640px;margin:0 auto;padding:28px 20px 60px;min-height:100vh;display:flex;flex-direction:column}
+
+.top{display:flex;align-items:center;gap:12px;margin-bottom:36px}
+.rose{width:38px;height:38px;flex-shrink:0}
+.top b{font-family:'Bricolage Grotesque';font-size:20px;font-weight:800;letter-spacing:-.01em}
+.top span{font-size:12px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;display:block;margin-top:-2px}
+
+.screen{display:none;flex:1;flex-direction:column}
+.screen.active{display:flex}
+
+.btn{font-family:'Inter';font-size:16px;font-weight:600;cursor:pointer;border:none;border-radius:10px;
+  padding:14px 22px;background:var(--gold);color:#241a03;transition:transform .12s,filter .12s}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn.ghost:hover{background:var(--panel-2);filter:none}
+
+/* ===== ACCUEIL ===== */
+.hero-h1{font-family:'Bricolage Grotesque';font-weight:800;font-size:clamp(30px,7vw,42px);letter-spacing:-.02em;margin-bottom:10px}
+.hero-h1 em{font-style:normal;color:var(--gold)}
+.hero-p{color:var(--muted);font-size:16px;margin-bottom:26px;max-width:440px}
+
+/* sélecteurs d'options (format, nombre de questions, continent) */
+.format{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.format .lbl{font-size:13px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;min-width:86px}
+.seg{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:4px}
+.seg.wrap{flex-wrap:wrap}   /* ★ CONTINENT : autorise le retour à la ligne (6 boutons) */
+.seg button{font-family:'Inter';font-size:14px;font-weight:600;cursor:pointer;border:none;background:transparent;
+  color:var(--muted);padding:8px 16px;border-radius:7px;transition:background .15s,color .15s}
+.seg button.on{background:var(--gold);color:#241a03}
+
+/* ★ SEO : texte descriptif discret en bas de l'accueil */
+.site-foot{margin-top:36px;font-size:13px;color:var(--muted);line-height:1.6;max-width:560px}
+
+.modes{display:flex;flex-direction:column;gap:14px;margin-top:16px}
+.mode{display:flex;align-items:center;gap:18px;text-align:left;width:100%;background:var(--panel);
+  border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;cursor:pointer;
+  transition:border-color .15s,background .15s,transform .15s;font-family:'Inter';color:var(--text)}
+.mode:not(.soon):hover{background:var(--panel-2);border-color:var(--gold);transform:translateY(-2px)}
+.mode .emoji{font-size:30px;flex-shrink:0}
+.mode .m-txt{flex:1}
+.mode .m-txt b{font-family:'Bricolage Grotesque';font-size:18px;font-weight:700;display:block}
+.mode .m-txt small{color:var(--muted);font-size:14px}
+.mode .badge{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;padding:5px 10px;border-radius:20px}
+.badge.on{background:rgba(63,182,139,.15);color:var(--ok)}
+.badge.off{background:rgba(255,255,255,.06);color:var(--muted)}
+.mode.soon{opacity:.55;cursor:not-allowed}
+
+/* ===== QUIZ ===== */
+.quiz-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;gap:14px}
+.quiz-back{font-family:'Inter';font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--line);
+  background:transparent;color:var(--muted);padding:8px 14px;border-radius:9px;flex-shrink:0;
+  display:inline-flex;align-items:center;gap:6px;transition:background .15s,border-color .15s,color .15s}
+.quiz-back:hover{background:var(--panel-2);border-color:var(--gold);color:var(--text)}
+.score{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px;flex-shrink:0}
+.score b{color:var(--gold);font-size:20px}
+/* ★ STREAK : badge « 🔥 n » visible à partir de 3 bonnes réponses d'affilée */
+.streak{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px;flex-shrink:0;
+  background:rgba(230,183,77,.12);border:1px solid rgba(230,183,77,.35);
+  color:var(--gold);padding:3px 10px;border-radius:20px}
+.streak b{display:inline-block}
+.streak b.bump{animation:pop .4s ease}
+/* ★ CHRONO : barre de temps qui se vide au fil de la question.
+   La largeur est pilotée en JavaScript (requestAnimationFrame), donc
+   elle fonctionne aussi quand les animations CSS sont désactivées. */
+.chrono-bar{height:6px;background:var(--panel);border:1px solid var(--line);
+  border-radius:4px;margin:-10px 0 18px;overflow:hidden}
+.chrono-fill{height:100%;width:100%;background:var(--gold);border-radius:4px}
+.chrono-fill.urgent{background:var(--ko)}
+.dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.dot.done{background:var(--muted)}
+.dot.now{background:var(--gold);transform:scale(1.25)}
+/* ★ NB QUESTIONS : au-delà de 20 questions, les points sont remplacés par un compteur texte */
+.progress-txt{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px;color:var(--muted)}
+.progress-txt b{color:var(--gold)}
+
+.flag-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:28px;text-align:center;margin-bottom:22px}
+.flag-card .q-label{font-size:13px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px}
+.flag-img{width:100%;max-width:300px;aspect-ratio:3/2;object-fit:contain;border-radius:8px;margin:0 auto;display:block;
+  box-shadow:0 8px 30px rgba(0,0,0,.35);background:var(--panel-2)}
+.flag-img.contour-img{aspect-ratio:1/1;object-fit:contain;padding:14px;filter:invert(1) drop-shadow(0 8px 20px rgba(0,0,0,.45))}
+
+/* ★ CAPITALES / INVERSÉ : nom du pays affiché dans la carte de question */
+.pays-nom{font-family:'Bricolage Grotesque';font-weight:700;font-size:22px;margin-top:16px;display:none}
+.pays-nom.solo{margin-top:4px;font-size:clamp(26px,6vw,34px)}  /* ★ INVERSÉ : sans drapeau, le nom prend toute la place */
+
+/* réponses QCM */
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.ans{font-family:'Inter';font-size:16px;font-weight:500;text-align:left;cursor:pointer;background:var(--panel);
+  border:1px solid var(--line);border-radius:11px;padding:16px 18px;color:var(--text);transition:background .12s,border-color .12s}
+.ans:not(:disabled):hover{background:var(--panel-2);border-color:var(--muted)}
+.ans:disabled{cursor:default}
+.ans.correct{background:rgba(63,182,139,.16);border-color:var(--ok);color:#c7f2e1}
+.ans.wrong{background:rgba(226,96,76,.14);border-color:var(--ko);color:#f6cabf}
+
+/* ====================================================================
+   ★ FEEDBACK : animations bonne / mauvaise réponse.
+   @keyframes = décrit les étapes d'une animation (0% → 100%).
+   La bonne réponse "rebondit", la mauvaise "tremble" (comme un
+   mot de passe erroné), et un ✓ ou ✗ apparaît sur le bouton.
+   ==================================================================== */
+@keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.05)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+@keyframes fadein{from{opacity:0;transform:translateY(-50%) scale(.4)}to{opacity:1;transform:translateY(-50%) scale(1)}}
+.ans{position:relative}
+.ans.correct{animation:pop .4s ease}
+.ans.wrong{animation:shake .45s ease}
+.ans.correct::after,.ans.wrong::after{
+  position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  font-size:19px;font-weight:700;animation:fadein .3s ease both .1s;
+}
+.ans.correct::after{content:"✓";color:var(--ok)}
+.ans.wrong::after{content:"✗";color:var(--ko)}
+/* mode inversé : le picto s'affiche en médaillon au centre du drapeau */
+.flag-ans.correct::after,.flag-ans.wrong::after{
+  right:auto;left:50%;top:50%;margin-left:-22px;margin-top:-22px;transform:none;
+  width:44px;height:44px;border-radius:50%;display:grid;place-items:center;
+  font-size:24px;background:rgba(15,26,43,.88);
+  animation:fadein-c .3s ease both .1s;
+}
+@keyframes fadein-c{from{opacity:0;scale:.4}to{opacity:1;scale:1}}
+/* le score rebondit en doré quand il augmente */
+.score b{display:inline-block}
+.score b.bump{animation:pop .4s ease}
+/* saisie libre : mêmes retours sur le champ et le verdict */
+.saisie input.wrong{border-color:var(--ko);animation:shake .45s ease}
+.saisie input.correct{border-color:var(--ok)}
+.saisie .verdict{animation:none}
+.saisie .verdict.ok,.saisie .verdict.ko{animation:fadein-c .3s ease both}
+/* ★ INVERSÉ : boutons de réponse contenant un drapeau au lieu d'un texte */
+.ans.flag-ans{padding:10px}
+.ans.flag-ans img{width:100%;aspect-ratio:3/2;object-fit:contain;border-radius:7px;display:block;background:var(--panel-2)}
+
+/* réponse SAISIE */
+.saisie{margin-bottom:20px}
+.saisie .row{display:flex;gap:10px}
+.saisie input{flex:1;font-family:'Inter';font-size:16px;background:var(--panel);border:1px solid var(--line);
+  border-radius:11px;padding:15px 18px;color:var(--text)}
+.saisie input::placeholder{color:var(--muted)}
+.saisie input:disabled{opacity:.7}
+.saisie .verdict{margin-top:14px;font-size:15px;min-height:22px}
+.saisie .verdict.ok{color:var(--ok)}
+.saisie .verdict.ko{color:var(--ko)}
+.saisie .verdict b{color:var(--text)}
+
+.next-row{display:flex;justify-content:flex-end;min-height:52px;align-items:center}
+#nextBtn{display:none}
+
+/* ===== RÉSULTAT ===== */
+.result{text-align:center;margin-top:40px}
+.result .big{font-family:'Bricolage Grotesque';font-weight:800;font-size:clamp(48px,14vw,80px);color:var(--gold);line-height:1}
+.result .big small{font-size:.4em;color:var(--muted);font-weight:600}
+.result h2{font-family:'Bricolage Grotesque';font-size:24px;margin:16px 0 8px}
+.result p{color:var(--muted);margin-bottom:30px}
+.result .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+/* ★ RÉCAP : liste des erreurs avec la correction, sous les boutons */
+.recap{margin-top:38px;text-align:left}
+.recap h3{font-family:'Bricolage Grotesque';font-size:15px;margin-bottom:14px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.err-item{display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);
+  border-radius:11px;padding:12px 14px;margin-bottom:10px}
+.err-item img{width:66px;aspect-ratio:3/2;object-fit:contain;border-radius:6px;flex-shrink:0;background:var(--panel-2)}
+.err-item img.contour-mini{aspect-ratio:1/1;object-fit:contain;padding:4px;filter:invert(1)}
+.err-item .txt b{display:block;font-family:'Bricolage Grotesque';font-size:16px}
+.err-item .txt small{color:var(--muted);font-size:13.5px}
+.err-item .txt small span{color:var(--ko)}
+
+/* ====================================================================
+   ★ MOBILE : tout ce bloc ne s'applique qu'aux écrans étroits.
+   Une "media query" = des règles CSS activées seulement sous une
+   certaine largeur d'écran (ici 540px, puis 400px).
+   ==================================================================== */
+@media(max-width:540px){
+  .app{padding:18px 14px 40px}
+  .top{margin-bottom:24px}
+  /* réglages de l'accueil : le libellé passe au-dessus des boutons */
+  .format{flex-direction:column;align-items:flex-start;gap:8px}
+  .format .lbl{min-width:0}
+  .seg{flex-wrap:wrap}                 /* les boutons peuvent aller à la ligne */
+  .seg button{padding:8px 13px}
+  .mode{padding:16px;gap:14px}
+  .mode .emoji{font-size:26px}
+  .flag-card{padding:20px 16px}
+  .ans{padding:14px 15px}
+  /* champ de saisie : le bouton Valider passe sous le champ si trop étroit */
+  .saisie .row{flex-wrap:wrap}
+  .saisie .row .btn{flex:1}
+}
+@media(max-width:400px){
+  .answers{grid-template-columns:1fr}  /* réponses texte : 1 colonne, plus lisible */
+}
+/* …sauf en mode inversé : les drapeaux restent sur 2 colonnes, sinon
+   ils deviennent énormes. :has() = "si le bloc contient un drapeau" */
+.answers:has(.flag-ans){grid-template-columns:1fr 1fr}
+
+/* ★ MOBILE : sur écran tactile (hover:none), on neutralise les effets
+   de survol qui "collent" au doigt après un tap */
+@media(hover:none){
+  .mode:not(.soon):hover{transform:none;border-color:var(--line);background:var(--panel)}
+  .ans:not(:disabled):hover{background:var(--panel);border-color:var(--line)}
+  .btn:hover{filter:none}
+}
+
+/* ====================================================================
+   ★ ORDINATEUR : sur grand écran, le conteneur s'élargit pour
+   mieux occuper l'espace disponible, et les modes de jeu passent
+   en grille à deux colonnes sur l'accueil.
+   ==================================================================== */
+@media(min-width:900px){
+  .app{max-width:960px;padding:44px 32px 70px}
+  .hero-p{max-width:640px}
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .flag-card{padding:36px}
+  .flag-img{max-width:360px}
+}
+@media(min-width:1300px){
+  .app{max-width:1120px}
+}
+
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
