@@ -673,10 +673,37 @@ function goHome(){
   afficherEcran('screen-home');
 }
 
+/* ★ MODALE : confirmation personnalisée, générique.
+   showConfirm(message, onYes) affiche la modale ; onYes est appelé sur OK.
+   Fermeture : Annuler, clic sur le fond ou touche Échap. */
+let confirmCallback = null;
+function showConfirm(message, onYes){
+  document.getElementById('confirmMsg').textContent = message;
+  confirmCallback = onYes;
+  document.getElementById('confirmOverlay').style.display = 'flex';
+  document.getElementById('confirmNo').focus();
+}
+function hideConfirm(){
+  document.getElementById('confirmOverlay').style.display = 'none';
+  confirmCallback = null;
+}
+document.getElementById('confirmYes').addEventListener('click', () => {
+  const cb = confirmCallback;
+  hideConfirm();
+  if(cb) cb();
+});
+document.getElementById('confirmNo').addEventListener('click', hideConfirm);
+document.getElementById('confirmOverlay').addEventListener('click', (e) => {
+  if(e.target.id === 'confirmOverlay') hideConfirm();
+});
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape' && document.getElementById('confirmOverlay').style.display !== 'none') hideConfirm();
+});
+
 /* ★ QUITTER : retour au menu en plein milieu d'une partie, avec
    confirmation pour éviter de perdre sa progression par erreur */
 function quitQuiz(){
-  if(confirm('Quitter la partie en cours et revenir au menu ?')) goHome();
+  showConfirm('Quitter la partie en cours et revenir au menu ?', goHome);
 }
 
 /* ★ SEO : navigation par l'adresse. Ouvrir …/#capitales lance le quiz
@@ -697,6 +724,7 @@ window.addEventListener('hashchange', appliquerHash);
    Sans effet sur téléphone, et ignoré pendant la saisie libre. */
 document.addEventListener('keydown', (e) => {
   if(!document.getElementById('screen-quiz').classList.contains('active')) return;
+  if(document.getElementById('confirmOverlay').style.display !== 'none') return;
   if(repondu || document.activeElement.tagName === 'INPUT') return;
   const n = ['1','2','3','4'].indexOf(e.key);
   if(n === -1) return;
