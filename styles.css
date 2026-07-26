@@ -9,17 +9,59 @@
   --text:#eaf1f9; --muted:#8ea6c2;
   --gold:#e6b74d; --ok:#3fb68b; --ko:#e2604c;
   --radius:14px;
+
+  /* ★ FOND « carte marine » : hachures + semis de points + dégradé de profondeur.
+     Deux variables suffisent à régler l'intensité du motif. */
+  --bg-2:#16263d;
+  --pat:rgba(255,255,255,.088);        /* hachures fines */
+  --pat-gold:rgba(230,183,77,.16);     /* semis de points dorés */
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{
   font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--bg);
+  /* ★ FOND : trois couches empilées, 100% CSS (aucune image chargée).
+     1. hachures à 45° façon carte marine
+     2. semis de points dorés (grille de 28px)
+     3. halo de profondeur en haut à droite
+     La dérive dure 110s : imperceptible à l'œil, mais le fond n'est jamais figé. */
   background-image:
-    linear-gradient(var(--line) 1px,transparent 1px),
-    linear-gradient(90deg,var(--line) 1px,transparent 1px);
-  background-size:48px 48px;min-height:100vh;min-height:100dvh;line-height:1.55;-webkit-font-smoothing:antialiased;
+    repeating-linear-gradient(45deg,var(--pat) 0 1px,transparent 1px 12px),
+    radial-gradient(circle,var(--pat-gold) 1.3px,transparent 1.5px),
+    radial-gradient(ellipse 120% 90% at 78% 8%,var(--bg-2),transparent 70%);
+  background-size:auto,28px 28px,auto;
+  background-attachment:fixed;
+  animation:fond-marine 110s linear infinite;
+  min-height:100vh;min-height:100dvh;line-height:1.55;-webkit-font-smoothing:antialiased;
   /* ★ MOBILE : 100dvh = hauteur réelle de l'écran sur téléphone,
      en tenant compte de la barre d'adresse qui apparaît/disparaît */
+}
+/* la 3e couche (le halo) ne bouge pas : seules les hachures et les points dérivent */
+@keyframes fond-marine{
+  from{background-position:0 0,0 0,0 0}
+  to{background-position:180px 180px,84px 84px,0 0}
+}
+
+/* ★ MODE CLAIR — s'active tout seul si le système de l'utilisateur est en clair.
+   Seuls les tokens changent : le fond, les cartes et le texte suivent.
+   Pour rester en sombre uniquement, supprime ce bloc. */
+@media(prefers-color-scheme:light){
+  :root{
+    --bg:#f4f0e6; --bg-2:#e7e0cf; --panel:#fffdf7; --panel-2:#f5f0e3;
+    --line:rgba(20,38,63,.13);
+    --text:#14263f; --muted:#6b7d95;
+    --gold:#a5760f; --ok:#2f8f6b; --ko:#c4432f;
+    --pat:rgba(20,38,63,.12);
+    --pat-gold:rgba(165,118,15,.26);
+  }
+  .btn{color:#fff8e6}
+  .seg button.on{color:#fff8e6}
+  .ans.correct{background:rgba(47,143,107,.14);color:#14563f}
+  .ans.wrong{background:rgba(196,67,47,.12);color:#7a2415}
+  .flag-img.contour-img{filter:none;drop-shadow:none}
+  .err-item img.contour-mini{filter:none}
+  .flag-ans.correct::after,.flag-ans.wrong::after{background:rgba(255,253,247,.92)}
+  .modal-overlay{background:rgba(60,52,34,.5)}
 }
 .display{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;line-height:1.05}
 
